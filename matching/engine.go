@@ -33,7 +33,7 @@ type Engine struct {
 	// 读取order的起始offset，该值第一次启动时候会从快照中恢复
 	orderOffset int64
 
-	// 从kafka中读取的order会写入chan，写入order的同时需要携带该order的offset
+	// 读取的order会写入chan，写入order的同时需要携带该order的offset
 	orderCh chan *OffsetOrder
 
 	// 用于保存orderBook log
