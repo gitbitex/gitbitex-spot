@@ -95,11 +95,13 @@ func (s *OrderBookStream) flush() {
 					continue
 				}
 				newSize := order.Size.Sub(log.RemainingSize)
-				l2Change = s.orderBook.saveOrder(logOffset.offset, log.Sequence, log.OrderId, newSize, log.Price, log.Side)
+				l2Change = s.orderBook.saveOrder(logOffset.offset, log.Sequence, log.OrderId, newSize, log.Price,
+					log.Side)
 
 			case *matching.OpenLog:
 				log := logOffset.log.(*matching.OpenLog)
-				l2Change = s.orderBook.saveOrder(logOffset.offset, log.Sequence, log.OrderId, log.RemainingSize, log.Price, log.Side)
+				l2Change = s.orderBook.saveOrder(logOffset.offset, log.Sequence, log.OrderId, log.RemainingSize,
+					log.Price, log.Side)
 
 			case *matching.MatchLog:
 				log := logOffset.log.(*matching.MatchLog)
@@ -108,7 +110,8 @@ func (s *OrderBookStream) flush() {
 					panic(fmt.Sprintf("should not happen : %+v", log))
 				}
 				newSize := order.Size.Sub(log.Size)
-				l2Change = s.orderBook.saveOrder(logOffset.offset, log.Sequence, log.MakerOrderId, newSize, log.Price, log.Side)
+				l2Change = s.orderBook.saveOrder(logOffset.offset, log.Sequence, log.MakerOrderId, newSize,
+					log.Price, log.Side)
 			}
 
 			if l2Change != nil {
