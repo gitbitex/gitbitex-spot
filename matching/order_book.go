@@ -277,15 +277,7 @@ func (o *orderBook) CancelOrder(order *models.Order) (logs []Log) {
 
 	bookOrder, found := o.depths[order.Side].orders[order.Id]
 	if !found {
-		doneLog := &DoneLog{
-			Base:          Base{LogTypeDone, o.nextLogSeq(), o.product.Id, time.Now()},
-			OrderId:       order.Id,
-			Price:         order.Price,
-			RemainingSize: order.Size,
-			Reason:        models.DoneReasonCancelled,
-			Side:          order.Side,
-		}
-		return append(logs, doneLog)
+		return logs
 	}
 
 	// 将order的size全部decr，等于remove操作
