@@ -90,6 +90,7 @@ func (t *TickMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
 				Granularity: granularity,
 				Time:        startPos,
 				LogOffset:   offset,
+				LogSeq:      log.Sequence,
 			}
 			t.ticks[granularity] = tick
 		} else {
@@ -98,6 +99,7 @@ func (t *TickMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
 			tick.High = decimal.Max(tick.High, log.Price)
 			tick.Volume = tick.Volume.Add(log.Size)
 			tick.LogOffset = offset
+			tick.LogSeq = log.Sequence
 		}
 
 		t.tickCh <- tick

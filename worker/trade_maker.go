@@ -76,6 +76,7 @@ func (t *TradeMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
 		Side:         log.Side,
 		Time:         log.Time,
 		LogOffset:    offset,
+		LogSeq:       log.Sequence,
 	}
 }
 

@@ -68,6 +68,7 @@ func (t *FillMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
 		Liquidity:  "T",
 		Side:       log.Side,
 		LogOffset:  offset,
+		LogSeq:     log.Sequence,
 	}
 	t.fillCh <- &models.Fill{
 		TradeId:    log.TradeId,
@@ -79,6 +80,7 @@ func (t *FillMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
 		Liquidity:  "M",
 		Side:       log.Side.Opposite(),
 		LogOffset:  offset,
+		LogSeq:     log.Sequence,
 	}
 }
 
@@ -95,6 +97,7 @@ func (t *FillMaker) OnDoneLog(log *matching.DoneLog, offset int64) {
 		Done:       true,
 		DoneReason: log.Reason,
 		LogOffset:  offset,
+		LogSeq:     log.Sequence,
 	}
 }
 
