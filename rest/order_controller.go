@@ -158,6 +158,7 @@ func CancelOrders(ctx *gin.Context) {
 
 // GET /orders
 func GetOrders(ctx *gin.Context) {
+	productId := ctx.Query("productId")
 	user := GetCurrentUser(ctx)
 	if user == nil {
 		ctx.JSON(http.StatusForbidden, ErrorResponse(errors.New("current user not present")))
@@ -165,7 +166,8 @@ func GetOrders(ctx *gin.Context) {
 	}
 
 	orderVos := []*orderVo{}
-	orders, err := service.GetOrdersByUserId(user.Id, []string{string(models.OrderStatusNew), string(models.OrderStatusOpen)}, "", "", 100)
+	orders, err := service.GetOrdersByUserId(user.Id,
+		[]string{string(models.OrderStatusNew), string(models.OrderStatusOpen)}, "", productId, 100)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
 		return
