@@ -49,6 +49,7 @@ func NewFillExecutor() *FillExecutor {
 			for {
 				select {
 				case fill := <-f.workerChs[idx]:
+					log.Info(fill.Id)
 					if settledOrderCache.Contains(fill.OrderId) {
 						continue
 					}
