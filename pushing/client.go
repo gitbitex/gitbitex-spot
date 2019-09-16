@@ -220,6 +220,8 @@ func (c *Client) onMessage(req *Request) {
 	switch req.Type {
 	case "subscribe":
 		c.onSub(req.CurrencyIds, req.ProductIds, req.Channels, req.Token)
+	case "unsubscribe":
+		c.onUnSub(req.CurrencyIds, req.ProductIds, req.Channels, req.Token)
 	default:
 	}
 }
@@ -239,7 +241,7 @@ func (c *Client) onSub(currencyIds []string, productIds []string, channels []str
 		for _, channel := range channels {
 			switch Channel(channel) {
 			case ChannelFunds:
-				c.subscribe(ChannelFunds.FormatWithUserId(userId), c)
+				c.subscribe(ChannelFunds.FormatWithUserId(userId))
 			}
 		}
 	}
@@ -248,21 +250,20 @@ func (c *Client) onSub(currencyIds []string, productIds []string, channels []str
 		for _, channel := range channels {
 			switch Channel(channel) {
 			case ChannelLevel2:
-				log.Info(c.id)
-				if c.subscribe(ChannelLevel2.FormatWithProductId(productId), c) {
+				if c.subscribe(ChannelLevel2.FormatWithProductId(productId)) {
 					if len(c.l2ChangeCh) == 0 {
 						c.l2ChangeCh <- &Level2Change{ProductId: productId}
 					}
 				}
 
 			case ChannelMatch:
-				c.subscribe(ChannelMatch.FormatWithProductId(productId), c)
+				c.subscribe(ChannelMatch.FormatWithProductId(productId))
 
 			case ChannelTicker:
-				c.subscribe(ChannelTicker.FormatWithProductId(productId), c)
+				c.subscribe(ChannelTicker.FormatWithProductId(productId))
 
 			case ChannelOrder:
-				c.subscribe(ChannelOrder.Format(productId, userId), c)
+				c.subscribe(ChannelOrder.Format(productId, userId))
 
 			default:
 				continue
@@ -271,7 +272,49 @@ func (c *Client) onSub(currencyIds []string, productIds []string, channels []str
 	}
 }
 
-func (c *Client) subscribe(channel string, client *Client) bool {
+func (c *Client) onUnSub(currencyIds []string, productIds []string, channels []string, token string) {
+	user, err := service.CheckToken(token)
+	if err != nil {
+		log.Error(err)
+	}
+
+	var userId int64
+	if user != nil {
+		userId = user.Id
+	}
+
+	for range currencyIds {
+		for _, channel := range channels {
+			switch Channel(channel) {
+			case ChannelFunds:
+				c.unsubscribe(ChannelFunds.FormatWithUserId(userId))
+			}
+		}
+	}
+
+	for _, productId := range productIds {
+		for _, channel := range channels {
+			switch Channel(channel) {
+			case ChannelLevel2:
+				c.unsubscribe(ChannelLevel2.FormatWithProductId(productId))
+
+			case ChannelMatch:
+				c.unsubscribe(ChannelMatch.FormatWithProductId(productId))
+
+			case ChannelTicker:
+				c.unsubscribe(ChannelTicker.FormatWithProductId(productId))
+
+			case ChannelOrder:
+				c.unsubscribe(ChannelOrder.Format(productId, userId))
+
+			default:
+				continue
+			}
+		}
+	}
+}
+
+func (c *Client) subscribe(channel string) bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -280,11 +323,20 @@ func (c *Client) subscribe(channel string, client *Client) bool {
 		return false
 	}
 
-	if c.sub.subscribe(channel, client) {
+	if c.sub.subscribe(channel, c) {
 		c.channels[channel] = struct{}{}
 		return true
 	}
 	return false
+}
+
+func (c *Client) unsubscribe(channel string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if c.sub.unsubscribe(channel, c) {
+		delete(c.channels, channel)
+	}
 }
 
 func (c *Client) close() {
