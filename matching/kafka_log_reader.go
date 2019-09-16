@@ -71,7 +71,7 @@ func (r *KafkaLogReader) Run(readerId string, seq, offset int64) {
 
 		if base.Sequence <= lastSeq {
 			// 丢弃重复的log
-			logger.Info("discard log :%+v", base)
+			logger.Infof("discard log :%+v", base)
 			continue
 		} else if lastSeq > 0 && base.Sequence != lastSeq+1 {
 			// seq发生不连续，可能是撮合引擎发生了严重错误

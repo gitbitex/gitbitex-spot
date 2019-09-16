@@ -229,12 +229,7 @@ func (o *orderBook) ApplyOrder(order *models.Order) (logs []Log) {
 
 	if takerOrder.Type == models.OrderTypeLimit && takerOrder.Size.GreaterThan(decimal.Zero) {
 		// limit taker还有未成交的size，则把taker放入orderBook
-		o.depths[takerOrder.Side].add(&BookOrder{
-			OrderId: takerOrder.OrderId,
-			Size:    takerOrder.Size,
-			Price:   takerOrder.Price,
-			Side:    takerOrder.Side,
-		})
+		o.depths[takerOrder.Side].add(*takerOrder)
 
 		openLog := &OpenLog{
 			Base:          Base{LogTypeOpen, o.nextLogSeq(), o.product.Id, time.Now()},
@@ -274,7 +269,6 @@ func (o *orderBook) ApplyOrder(order *models.Order) (logs []Log) {
 		}
 		logs = append(logs, doneLog)
 	}
-
 	return logs
 }
 
@@ -339,7 +333,7 @@ func (o *orderBook) Restore(snapshot *orderBookSnapshot) {
 	}
 
 	for _, order := range snapshot.Orders {
-		o.depths[order.Side].add(&order)
+		o.depths[order.Side].add(order)
 	}
 }
 
@@ -353,8 +347,8 @@ func (o *orderBook) nextTradeSeq() int64 {
 	return o.tradeSeq
 }
 
-func (d *depth) add(order *BookOrder) {
-	d.orders[order.OrderId] = order
+func (d *depth) add(order BookOrder) {
+	d.orders[order.OrderId] = &order
 
 	d.queue.Put(&priceOrderIdKey{order.Price, order.OrderId}, order.OrderId)
 
@@ -394,7 +388,10 @@ func (d *depth) decrSize(orderId int64, size decimal.Decimal) error {
 		d.queue.Remove(&priceOrderIdKey{order.Price, order.OrderId})
 	}
 
-	val, _ := d.levels.Get(order.Price)
+	val, f := d.levels.Get(order.Price)
+	if !f {
+		log.Infof("%+v", order)
+	}
 	level := val.(*PriceLevel)
 	level.Size = level.Size.Sub(size)
 	if level.Size.IsZero() {
