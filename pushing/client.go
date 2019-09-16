@@ -156,7 +156,7 @@ func (c *Client) runL2ChangeWriter(ctx context.Context) {
 				}
 
 				// 最新的snapshot版本太旧了，丢弃，等待更新的snapshot版本
-				if lastSeq > snapshot.Seq {
+				if snapshot == nil || lastSeq > snapshot.Seq {
 					log.Warnf("last snapshot too old: %v changeSeq=%v snapshotSeq=%v",
 						l2Change.ProductId, lastSeq, snapshot.Seq)
 					continue
