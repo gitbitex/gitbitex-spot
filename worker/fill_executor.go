@@ -68,7 +68,7 @@ func NewFillExecutor() *FillExecutor {
 
 					err = service.ExecuteFill(fill.OrderId)
 					if err != nil {
-						//log.Error(err)
+						log.Error(err)
 					}
 				}
 			}
