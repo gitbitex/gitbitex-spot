@@ -32,7 +32,7 @@ func (s *Store) GetLastTradeByProductId(productId string) (*models.Trade, error)
 }
 
 func (s *Store) GetTradesByProductId(productId string, count int) ([]*models.Trade, error) {
-	db := s.db.Where("product_id =?", 0).Order("id DESC").Limit(count)
+	db := s.db.Where("product_id =?", productId).Order("id DESC").Limit(count)
 	var trades []*models.Trade
 	err := db.Find(&trades).Error
 	return trades, err

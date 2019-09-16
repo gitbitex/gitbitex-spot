@@ -388,10 +388,7 @@ func (d *depth) decrSize(orderId int64, size decimal.Decimal) error {
 		d.queue.Remove(&priceOrderIdKey{order.Price, order.OrderId})
 	}
 
-	val, f := d.levels.Get(order.Price)
-	if !f {
-		log.Infof("%+v", order)
-	}
+	val, _ := d.levels.Get(order.Price)
 	level := val.(*PriceLevel)
 	level.Size = level.Size.Sub(size)
 	if level.Size.IsZero() {
