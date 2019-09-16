@@ -49,6 +49,7 @@ func (s *Store) AddTrades(trades []*models.Trade) error {
 			trade.Time, trade.LogOffset, trade.LogSeq)
 		valueStrings = append(valueStrings, valueString)
 	}
-	sql := fmt.Sprintf("INSERT IGNORE  INTO g_trade (created_at,product_id,taker_order_id,maker_order_id,price,size,side,time,log_offset) VALUES %s", strings.Join(valueStrings, ","))
+	sql := fmt.Sprintf("INSERT IGNORE  INTO g_trade (created_at,product_id,taker_order_id,maker_order_id,"+
+		"price,size,side,time,log_offset,log_seq) VALUES %s", strings.Join(valueStrings, ","))
 	return s.db.Exec(sql).Error
 }

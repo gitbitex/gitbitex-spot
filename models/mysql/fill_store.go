@@ -64,7 +64,7 @@ func (s *Store) AddFills(fills []*models.Fill) error {
 		valueStrings = append(valueStrings, valueString)
 	}
 	sql := fmt.Sprintf("INSERT IGNORE INTO g_fill (created_at,product_id,trade_id,order_id, message_seq,size,"+
-		"price,funds,liquidity,fee,settled,side,done,done_reason,log_offset) VALUES %s",
+		"price,funds,liquidity,fee,settled,side,done,done_reason,log_offset,log_seq) VALUES %s",
 		strings.Join(valueStrings, ","))
 	return s.db.Exec(sql).Error
 }

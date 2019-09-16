@@ -50,6 +50,7 @@ func (s *Store) AddTicks(ticks []*models.Tick) error {
 			tick.Volume, tick.LogOffset, tick.LogSeq)
 		valueStrings = append(valueStrings, valueString)
 	}
-	sql := fmt.Sprintf("REPLACE INTO g_tick (created_at, product_id,granularity,time,open,low,high,close,volume,log_offset) VALUES %s", strings.Join(valueStrings, ","))
+	sql := fmt.Sprintf("REPLACE INTO g_tick (created_at, product_id,granularity,time,open,low,high,close,"+
+		"volume,log_offset,log_seq) VALUES %s", strings.Join(valueStrings, ","))
 	return s.db.Exec(sql).Error
 }
