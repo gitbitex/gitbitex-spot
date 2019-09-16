@@ -23,7 +23,7 @@ import (
 )
 
 func (s *Store) GetTicksByProductId(productId string, granularity int64) ([]*models.Tick, error) {
-	db := s.db.Where("product_id =?", 0).Where("granularity=?", granularity).Order("time DESC")
+	db := s.db.Where("product_id =?", productId).Where("granularity=?", granularity).Order("time DESC")
 	var ticks []*models.Tick
 	err := db.Find(&ticks).Error
 	return ticks, err
