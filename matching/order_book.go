@@ -43,7 +43,7 @@ type orderBook struct {
 	// 严格连续递增的日志seq，用于写入撮合日志
 	logSeq int64
 
-	// 防止order被重复提交到orderBook中
+	// 防止order被重复提交到orderBook中，采用滑动窗口去重策略
 	orderIdWindow Window
 }
 
@@ -119,6 +119,7 @@ func NewOrderBook(product *models.Product) *orderBook {
 }
 
 func (o *orderBook) ApplyOrder(order *models.Order) (logs []Log) {
+	// 订单去重，防止订单被重复提交到撮合引擎
 	err := o.orderIdWindow.put(order.Id)
 	if err != nil {
 		log.Error(err)

@@ -2,6 +2,8 @@
 
 GitBitEx是一个高性能的开源数字货币交易系统
 
+<p align="center"><img width="100%" src="https://oooooo.oss-cn-hangzhou.aliyuncs.com/gitbitex.png" /></p>
+
 ## Demo
 https://gitbitex.com:8080/trade/BTC-USDT
 
