@@ -12,5 +12,3 @@ https://gitbitex.com:8080/trade/BTC-USDT
 - [ ] 完善手续费体系
 - [ ] C2C交易
 - [ ] 钱包
-
-## 性能测试
