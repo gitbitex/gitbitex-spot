@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/gitbitex/gitbitex-spot/models"
-	utils2 "github.com/gitbitex/gitbitex-spot/utils"
+	"github.com/gitbitex/gitbitex-spot/utils"
 	"github.com/shopspring/decimal"
 	"github.com/siddontang/go-log/log"
 	"math"
@@ -100,12 +100,12 @@ type BookOrder struct {
 
 func NewOrderBook(product *models.Product) *orderBook {
 	asks := &depth{
-		levels: treemap.NewWith(utils2.DecimalAscComparator),
+		levels: treemap.NewWith(utils.DecimalAscComparator),
 		queue:  treemap.NewWith(priceOrderIdKeyAscComparator),
 		orders: map[int64]*BookOrder{},
 	}
 	bids := &depth{
-		levels: treemap.NewWith(utils2.DecimalDescComparator),
+		levels: treemap.NewWith(utils.DecimalDescComparator),
 		queue:  treemap.NewWith(priceOrderIdKeyDescComparator),
 		orders: map[int64]*BookOrder{},
 	}
