@@ -70,8 +70,13 @@ func (s *BinLogStream) OnRow(e *canal.RowsEvent) error {
 		}
 
 	case "g_account":
+		var n = 0
+		if e.Action == "update" {
+			n = 1
+		}
+
 		var v Account
-		s.parseRow(e, e.Rows[0], &v)
+		s.parseRow(e, e.Rows[n], &v)
 
 		buf, _ := json.Marshal(v)
 		ret := s.redisClient.Publish(TopicAccount, buf)
