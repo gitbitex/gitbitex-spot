@@ -57,6 +57,12 @@ func SignIn(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, OkResponse(token))
 }
 
+// DELETE /users/accessToken
+func SignOut(ctx *gin.Context) {
+	ctx.SetCookie("accessToken", "", 7*24*60*60, "/", "*", false, false)
+	ctx.JSON(http.StatusOK, OkResponse(nil))
+}
+
 // GET /users/self
 func GetUsersSelf(ctx *gin.Context) {
 	user := GetCurrentUser(ctx)

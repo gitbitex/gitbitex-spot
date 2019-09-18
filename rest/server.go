@@ -51,6 +51,8 @@ func (server *HttpServer) Start() {
 		private.DELETE("/api/orders", CancelOrders)
 		private.GET("/api/accounts", GetAccounts)
 		private.GET("/api/users/self", GetUsersSelf)
+		private.DELETE("/api/users/accessToken", SignOut)
+
 	}
 
 	err := r.Run(server.addr)
