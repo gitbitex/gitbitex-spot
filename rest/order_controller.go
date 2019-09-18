@@ -72,7 +72,7 @@ func PlaceOrder(ctx *gin.Context) {
 	var req placeOrderRequest
 	err := ctx.BindJSON(&req)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
 
@@ -97,13 +97,13 @@ func PlaceOrder(ctx *gin.Context) {
 
 	order, err := service.PlaceOrder(GetCurrentUser(ctx).Id, productId, orderType, side, size, price, funds)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
 
 	submitOrder(order)
 
-	ctx.JSON(http.StatusOK, OkResponse(order))
+	ctx.JSON(http.StatusOK, order)
 }
 
 // 撤销指定id的订单
@@ -114,18 +114,18 @@ func CancelOrder(ctx *gin.Context) {
 
 	order, err := service.GetOrderById(orderId)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
 	if order == nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(errors.New("order not found")))
+		ctx.JSON(http.StatusInternalServerError, newMessageVo(errors.New("order not found")))
 		return
 	}
 
 	order.Status = models.OrderStatusCancelling
 	submitOrder(order)
 
-	ctx.JSON(http.StatusOK, OkResponse(""))
+	ctx.JSON(http.StatusOK, nil)
 }
 
 // 批量撤单
@@ -141,7 +141,7 @@ func CancelOrders(ctx *gin.Context) {
 
 	orders, err := service.GetOrdersByUserId(GetCurrentUser(ctx).Id, []string{string(models.OrderStatusOpen), string(models.OrderStatusNew)}, side, productId, 10000)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
 
@@ -153,7 +153,7 @@ func CancelOrders(ctx *gin.Context) {
 		submitOrder(order)
 	}
 
-	ctx.JSON(http.StatusOK, OkResponse(""))
+	ctx.JSON(http.StatusOK, nil)
 }
 
 // GET /orders
@@ -161,7 +161,7 @@ func GetOrders(ctx *gin.Context) {
 	productId := ctx.Query("productId")
 	user := GetCurrentUser(ctx)
 	if user == nil {
-		ctx.JSON(http.StatusForbidden, ErrorResponse(errors.New("current user not present")))
+		ctx.JSON(http.StatusForbidden, newMessageVo(errors.New("current user not present")))
 		return
 	}
 
@@ -169,12 +169,12 @@ func GetOrders(ctx *gin.Context) {
 	orders, err := service.GetOrdersByUserId(user.Id,
 		[]string{string(models.OrderStatusNew), string(models.OrderStatusOpen)}, "", productId, 100)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
 	for _, order := range orders {
 		orderVos = append(orderVos, order2OrderVo(order))
 	}
 
-	ctx.JSON(http.StatusOK, OkResponse(orderVos))
+	ctx.JSON(http.StatusOK, orderVos)
 }

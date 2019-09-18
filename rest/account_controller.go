@@ -29,7 +29,7 @@ func GetAccounts(ctx *gin.Context) {
 		for _, currency := range currencies {
 			account, err := service.GetAccount(GetCurrentUser(ctx).Id, currency)
 			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+				ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 				return
 			}
 			if account == nil {
@@ -41,12 +41,12 @@ func GetAccounts(ctx *gin.Context) {
 	} else {
 		accounts, err := service.GetAccountsByUserId(GetCurrentUser(ctx).Id)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+			ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 			return
 		}
 		for _, account := range accounts {
 			accountVos = append(accountVos, Account2AccountVo(account))
 		}
 	}
-	ctx.JSON(http.StatusOK, OkResponse(accountVos))
+	ctx.JSON(http.StatusOK, accountVos)
 }

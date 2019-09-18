@@ -15,29 +15,19 @@
 package rest
 
 import (
+	"fmt"
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/gitbitex/gitbitex-spot/utils"
+	"strings"
 	"time"
 )
 
-type apiResponse struct {
-	Code int         `json:"code"`
-	Data interface{} `json:"data"`
-}
-
-type errorResponse struct {
+type messageVo struct {
 	Message string `json:"message"`
 }
 
-func OkResponse(data interface{}) *apiResponse {
-	return &apiResponse{
-		Code: 0,
-		Data: data,
-	}
-}
-
-func ErrorResponse(error error) *errorResponse {
-	return &errorResponse{
+func newMessageVo(error error) *messageVo {
+	return &messageVo{
 		Message: error.Error(),
 	}
 }
@@ -127,7 +117,7 @@ func trade2TradeVo(trade *models.Trade) *tradeVo {
 		TradeId: trade.Id,
 		Price:   trade.Price.String(),
 		Size:    trade.Size.String(),
-		Side:    string(trade.Side),
+		Side:    trade.Side.String(),
 	}
 }
 
@@ -151,22 +141,22 @@ func order2OrderVo(order *models.Order) *orderVo {
 		Size:          order.Size.String(),
 		Funds:         order.ExecutedValue.String(),
 		ProductId:     order.ProductId,
-		Side:          string(order.Side),
-		Type:          string(order.Type),
+		Side:          order.Side.String(),
+		Type:          order.Type.String(),
 		CreatedAt:     order.CreatedAt.Format(time.RFC3339),
 		FillFees:      order.FillFees.String(),
 		FilledSize:    order.FilledSize.String(),
 		ExecutedValue: order.ExecutedValue.String(),
-		Status:        string(order.Status),
+		Status:        order.Status.String(),
 		Settled:       order.Settled,
 	}
 }
 
 func Account2AccountVo(account *models.Account) *AccountVo {
 	return &AccountVo{
-		Id:           "xxx",
+		Id:           fmt.Sprintf("%v", account.Id),
 		Currency:     account.Currency,
-		CurrencyIcon: "http://xxxxxx.com/a.png",
+		CurrencyIcon: fmt.Sprintf("https://oooooo.oss-cn-hangzhou.aliyuncs.com/coin/%v.png", strings.ToLower(account.Currency)),
 		Available:    account.Available.String(),
 		Hold:         account.Hold.String(),
 	}

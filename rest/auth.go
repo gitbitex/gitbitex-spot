@@ -31,18 +31,18 @@ func checkToken() gin.HandlerFunc {
 			var err error
 			token, err = c.Cookie("accessToken")
 			if err != nil {
-				c.AbortWithStatusJSON(http.StatusForbidden, ErrorResponse(errors.New("token not found")))
+				c.AbortWithStatusJSON(http.StatusForbidden, newMessageVo(errors.New("token not found")))
 				return
 			}
 		}
 
 		user, err := service.CheckToken(token)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, ErrorResponse(err))
+			c.AbortWithStatusJSON(http.StatusInternalServerError, newMessageVo(err))
 			return
 		}
 		if user == nil {
-			c.AbortWithStatusJSON(http.StatusForbidden, ErrorResponse(errors.New("bad token")))
+			c.AbortWithStatusJSON(http.StatusForbidden, newMessageVo(errors.New("bad token")))
 			return
 		}
 

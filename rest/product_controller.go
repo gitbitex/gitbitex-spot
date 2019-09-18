@@ -25,7 +25,7 @@ import (
 func GetProducts(ctx *gin.Context) {
 	products, err := service.GetProducts()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
 
@@ -34,7 +34,7 @@ func GetProducts(ctx *gin.Context) {
 		productVos = append(productVos, product2ProductVo(product))
 	}
 
-	ctx.JSON(http.StatusOK, OkResponse(productVos))
+	ctx.JSON(http.StatusOK, productVos)
 }
 
 // GET /products/<product-id>/book?level=[1,2,3]
@@ -57,7 +57,7 @@ func GetProductTrades(ctx *gin.Context) {
 		tradeVos = append(tradeVos, trade2TradeVo(trade))
 	}
 
-	ctx.JSON(http.StatusOK, OkResponse(tradeVos))
+	ctx.JSON(http.StatusOK, tradeVos)
 }
 
 // GET /products/<product-id>/candles
@@ -72,7 +72,7 @@ func GetProductCandles(ctx *gin.Context) {
 	var tickVos [][6]float64
 	ticks, err := service.GetTicksByProductId(productId, granularity/60)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
 	for _, tick := range ticks {
@@ -80,5 +80,5 @@ func GetProductCandles(ctx *gin.Context) {
 			utils.DToF64(tick.Open), utils.DToF64(tick.Close), utils.DToF64(tick.Volume)})
 	}
 
-	ctx.JSON(http.StatusOK, OkResponse(tickVos))
+	ctx.JSON(http.StatusOK, tickVos)
 }

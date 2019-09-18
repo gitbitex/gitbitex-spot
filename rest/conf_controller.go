@@ -24,7 +24,7 @@ import (
 func GetConfigs(ctx *gin.Context) {
 	configs, err := service.GetConfigs()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
 
@@ -33,5 +33,5 @@ func GetConfigs(ctx *gin.Context) {
 		m[config.Key] = config.Value
 	}
 
-	ctx.JSON(http.StatusOK, OkResponse(m))
+	ctx.JSON(http.StatusOK, m)
 }

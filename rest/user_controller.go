@@ -26,16 +26,16 @@ func SignUp(ctx *gin.Context) {
 	var request SignUpRequest
 	err := ctx.BindJSON(&request)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
 		return
 	}
 
 	_, err = service.SignUp(request.Email, request.Password)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, OkResponse(nil))
+	ctx.JSON(http.StatusOK, nil)
 }
 
 // POST /users/accessToken
@@ -43,24 +43,24 @@ func SignIn(ctx *gin.Context) {
 	var request SignUpRequest
 	err := ctx.BindJSON(&request)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
 		return
 	}
 
 	token, err := service.RefreshAccessToken(request.Email, request.Password)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
 		return
 	}
 
 	ctx.SetCookie("accessToken", token, 7*24*60*60, "/", "*", false, false)
-	ctx.JSON(http.StatusOK, OkResponse(token))
+	ctx.JSON(http.StatusOK, token)
 }
 
 // DELETE /users/accessToken
 func SignOut(ctx *gin.Context) {
 	ctx.SetCookie("accessToken", "", -1, "/", "*", false, false)
-	ctx.JSON(http.StatusOK, OkResponse(nil))
+	ctx.JSON(http.StatusOK, nil)
 }
 
 // GET /users/self
@@ -80,5 +80,5 @@ func GetUsersSelf(ctx *gin.Context) {
 		CreatedAt:    user.CreatedAt.Format(time.RFC3339),
 	}
 
-	ctx.JSON(http.StatusOK, OkResponse(userVo))
+	ctx.JSON(http.StatusOK, userVo)
 }
