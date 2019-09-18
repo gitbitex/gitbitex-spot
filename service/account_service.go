@@ -94,7 +94,7 @@ func HoldBalance(db models.Store, userId int64, currency string, size decimal.De
 		return err
 	}
 	if !enough {
-		return errors.New(fmt.Sprintf("no enough %v : request=%f", currency, size))
+		return errors.New(fmt.Sprintf("no enough %v : request=%v", currency, size))
 	}
 
 	account, err := db.GetAccountForUpdate(userId, currency)
