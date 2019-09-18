@@ -155,7 +155,7 @@ func (c *Client) runL2ChangeWriter(ctx context.Context) {
 					continue
 				}
 				if snapshot == nil {
-					log.Warnf("not snapshot for %v", l2Change.ProductId)
+					log.Warnf("no snapshot for %v", l2Change.ProductId)
 					continue
 				}
 
