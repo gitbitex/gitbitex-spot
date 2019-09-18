@@ -37,11 +37,11 @@ func PlaceOrder(userId int64, productId string, orderType models.OrderType, side
 	if orderType == models.OrderTypeLimit {
 		size = size.Round(product.BaseScale)
 		if size.LessThan(product.BaseMinSize) {
-			return nil, errors.New(fmt.Sprintf("size %v less than base min size %v", size, product.BaseMinSize))
+			return nil, fmt.Errorf("size %v less than base min size %v", size, product.BaseMinSize)
 		}
 		price = price.Round(product.QuoteScale)
 		if size.LessThan(decimal.Zero) {
-			return nil, errors.New(fmt.Sprintf("price %v less than 0", price))
+			return nil, fmt.Errorf("price %v less than 0", price)
 		}
 		funds = size.Mul(price)
 	} else if orderType == models.OrderTypeMarket {
@@ -50,12 +50,12 @@ func PlaceOrder(userId int64, productId string, orderType models.OrderType, side
 			price = decimal.Zero
 			funds = funds.Round(product.QuoteScale)
 			if funds.LessThan(product.QuoteMinSize) {
-				return nil, errors.New(fmt.Sprintf("funds %v less than quote min size %v", funds, product.QuoteMinSize))
+				return nil, fmt.Errorf("funds %v less than quote min size %v", funds, product.QuoteMinSize)
 			}
 		} else {
 			size = size.Round(product.BaseScale)
 			if size.LessThan(product.BaseMinSize) {
-				return nil, errors.New(fmt.Sprintf("size %v less than base min size %v", size, product.BaseMinSize))
+				return nil, fmt.Errorf("size %v less than base min size %v", size, product.BaseMinSize)
 			}
 			price = decimal.Zero
 			funds = decimal.Zero
@@ -120,10 +120,10 @@ func ExecuteFill(orderId int64) error {
 		return err
 	}
 	if order == nil {
-		return errors.New(fmt.Sprintf("order not found: %v", orderId))
+		return fmt.Errorf("order not found: %v", orderId)
 	}
 	if order.Status == models.OrderStatusFilled || order.Status == models.OrderStatusCancelled {
-		return errors.New(fmt.Sprintf("order status invalid: %v %v", orderId, order.Status))
+		return fmt.Errorf("order status invalid: %v %v", orderId, order.Status)
 	}
 
 	product, err := GetProductById(order.ProductId)
@@ -131,7 +131,7 @@ func ExecuteFill(orderId int64) error {
 		return err
 	}
 	if product == nil {
-		return errors.New(fmt.Sprintf("product not found: %v", order.ProductId))
+		return fmt.Errorf("product not found: %v", order.ProductId)
 	}
 
 	fills, err := mysql.SharedStore().GetUnsettledFillsByOrderId(orderId)
