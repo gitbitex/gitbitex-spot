@@ -118,7 +118,8 @@ func (s *OrderBookStream) flush() {
 				s.sub.publish(ChannelLevel2.FormatWithProductId(s.productId), l2Change)
 			}
 
-			if s.orderBook.seq > lastLevel2Snapshot.Seq+10 {
+			delta := s.orderBook.seq - lastLevel2Snapshot.Seq
+			if delta > 10 {
 				lastLevel2Snapshot = s.orderBook.SnapshotLevel2()
 				err := sharedSnapshotStore().storeLevel2(s.productId, &lastLevel2Snapshot)
 				if err != nil {
@@ -126,7 +127,8 @@ func (s *OrderBookStream) flush() {
 				}
 			}
 
-			if s.orderBook.seq > lastFullSnapshot.Seq+10 {
+			delta = s.orderBook.seq - lastFullSnapshot.Seq
+			if delta > 10 {
 				lastFullSnapshot = s.orderBook.SnapshotFull()
 				err := sharedSnapshotStore().storeFull(s.productId, &lastFullSnapshot)
 				if err != nil {
