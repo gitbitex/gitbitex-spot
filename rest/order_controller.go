@@ -28,6 +28,7 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/siddontang/go-log/log"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -174,6 +175,12 @@ func GetOrders(ctx *gin.Context) {
 	}
 	for _, order := range orders {
 		orderVos = append(orderVos, order2OrderVo(order))
+	}
+
+	if len(orders) > 0 {
+		ctx.Header("GBE-BEFORE", strconv.FormatInt(orders[0].Id, 10))
+		ctx.Header("GBE-AFTER", strconv.FormatInt(orders[len(orders)-1].Id, 10))
+
 	}
 
 	ctx.JSON(http.StatusOK, orderVos)
