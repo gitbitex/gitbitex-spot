@@ -182,8 +182,8 @@ func GetOrders(ctx *gin.Context) {
 		newBefore = orders[0].Id
 		newAfter = orders[len(orders)-1].Id
 	}
-	ctx.Header("GBE-BEFORE", strconv.FormatInt(newBefore, 10))
-	ctx.Header("GBE-AFTER", strconv.FormatInt(newAfter, 10))
+	ctx.Header("gbe-before", strconv.FormatInt(newBefore, 10))
+	ctx.Header("gbe-after", strconv.FormatInt(newAfter, 10))
 
 	ctx.JSON(http.StatusOK, orderVos)
 }
