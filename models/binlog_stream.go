@@ -85,7 +85,7 @@ func (s *BinLogStream) OnRow(e *canal.RowsEvent) error {
 		}
 
 	case "g_fill":
-		if e.Action == "delete" {
+		if e.Action == "delete" || e.Action == "update" {
 			return nil
 		}
 
@@ -99,7 +99,7 @@ func (s *BinLogStream) OnRow(e *canal.RowsEvent) error {
 		}
 
 	case "g_bill":
-		if e.Action == "delete" {
+		if e.Action == "delete" || e.Action == "update" {
 			return nil
 		}
 
