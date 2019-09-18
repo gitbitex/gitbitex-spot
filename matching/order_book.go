@@ -157,7 +157,8 @@ func (o *orderBook) ApplyOrder(order *models.Order) (logs []Log) {
 
 		var size decimal.Decimal
 		var price decimal.Decimal
-		if takerOrder.Type == models.OrderTypeLimit || (takerOrder.Type == models.OrderTypeMarket && takerOrder.Side == models.SideSell) {
+		if takerOrder.Type == models.OrderTypeLimit ||
+			(takerOrder.Type == models.OrderTypeMarket && takerOrder.Side == models.SideSell) {
 			if takerOrder.Size.IsZero() {
 				break
 			}

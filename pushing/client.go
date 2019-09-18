@@ -343,7 +343,7 @@ func (c *Client) close() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	for channel, _ := range c.channels {
+	for channel := range c.channels {
 		c.sub.unsubscribe(channel, c)
 	}
 }
