@@ -26,13 +26,13 @@ func SignUp(ctx *gin.Context) {
 	var request SignUpRequest
 	err := ctx.BindJSON(&request)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
 		return
 	}
 
 	_, err = service.SignUp(request.Email, request.Password)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, OkResponse(nil))
@@ -43,13 +43,13 @@ func SignIn(ctx *gin.Context) {
 	var request SignUpRequest
 	err := ctx.BindJSON(&request)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
 		return
 	}
 
 	token, err := service.RefreshAccessToken(request.Email, request.Password)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
 		return
 	}
 

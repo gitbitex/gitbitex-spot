@@ -21,9 +21,12 @@ import (
 )
 
 type apiResponse struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+	Code int         `json:"code"`
+	Data interface{} `json:"data"`
+}
+
+type errorResponse struct {
+	Message string `json:"message"`
 }
 
 func OkResponse(data interface{}) *apiResponse {
@@ -33,16 +36,8 @@ func OkResponse(data interface{}) *apiResponse {
 	}
 }
 
-func ErrorResponse(error error) *apiResponse {
-	return &apiResponse{
-		Code:    5000,
-		Message: error.Error(),
-	}
-}
-
-func ErrorResponseWithCode(code int, error error) *apiResponse {
-	return &apiResponse{
-		Code:    code,
+func ErrorResponse(error error) *errorResponse {
+	return &errorResponse{
 		Message: error.Error(),
 	}
 }
