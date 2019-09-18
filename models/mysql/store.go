@@ -68,16 +68,25 @@ func initDb() error {
 		return "g_" + defaultTableName
 	}
 
-	/*	log.Error(gdb.AutoMigrate(&models.Account{}).Error)
-		log.Error(gdb.AutoMigrate(&models.Order{}).Error)
-		log.Error(gdb.AutoMigrate(&models.Product{}).Error)
-		log.Error(gdb.AutoMigrate(&models.Trade{}).Error)
-		log.Error(gdb.AutoMigrate(&models.Fill{}).Error)
-		log.Error(gdb.AutoMigrate(&models.User{}).Error)
-		log.Error(gdb.AutoMigrate(&models.Bill{}).Error)
-		log.Error(gdb.AutoMigrate(&models.Tick{}).Error)
-		log.Error(gdb.AutoMigrate(&models.Config{}).Error)
-	*/
+	// disable this in production mode
+	/*var tables = []interface{}{
+		&models.Account{},
+		&models.Order{},
+		&models.Product{},
+		&models.Trade{},
+		&models.Fill{},
+		&models.User{},
+		&models.Bill{},
+		&models.Tick{},
+		&models.Config{},
+	}
+	for _, table := range tables {
+		log.Warnf("migrating database, table: %v", reflect.TypeOf(table))
+		if err = gdb.AutoMigrate(table).Error; err != nil {
+			return err
+		}
+	}*/
+
 	return nil
 }
 
