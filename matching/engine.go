@@ -34,7 +34,7 @@ type Engine struct {
 	orderOffset int64
 
 	// 读取的order会写入chan，写入order的同时需要携带该order的offset
-	orderCh chan *OffsetOrder
+	orderCh chan *offsetOrder
 
 	// 用于保存orderBook log
 	logStore LogStore
@@ -61,7 +61,7 @@ type Snapshot struct {
 	OrderOffset       int64
 }
 
-type OffsetOrder struct {
+type offsetOrder struct {
 	Offset int64
 	Order  *models.Order
 }
@@ -71,7 +71,7 @@ func NewEngine(product *models.Product, orderReader OrderReader, logStore LogSto
 		productId:            product.Id,
 		OrderBook:            NewOrderBook(product),
 		logCh:                make(chan Log, 10000),
-		orderCh:              make(chan *OffsetOrder, 10000),
+		orderCh:              make(chan *offsetOrder, 10000),
 		snapshotReqCh:        make(chan *Snapshot, 32),
 		snapshotApproveReqCh: make(chan *Snapshot, 32),
 		snapshotCh:           make(chan *Snapshot, 32),
@@ -115,11 +115,7 @@ func (e *Engine) runFetcher() {
 			logger.Error(err)
 			continue
 		}
-
-		if len(e.orderCh) == cap(e.orderCh) {
-			logger.Warn("chan is full, may block")
-		}
-		e.orderCh <- &OffsetOrder{offset, order}
+		e.orderCh <- &offsetOrder{offset, order}
 	}
 }
 
@@ -140,9 +136,6 @@ func (e *Engine) runApplier() {
 
 			// 将orderBook产生的log写入chan进行持久化
 			for _, log := range logs {
-				if len(e.logCh) == cap(e.logCh) {
-					logger.Warn("chan is full, may block")
-				}
 				e.logCh <- log
 			}
 
