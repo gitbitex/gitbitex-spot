@@ -390,7 +390,6 @@ func (d *depth) decrSize(orderId int64, size decimal.Decimal) error {
 	} else if removed {
 		level.OrderCount--
 	}
-
 	return nil
 }
 
@@ -421,7 +420,6 @@ func priceOrderIdKeyDescComparator(a, b interface{}) int {
 	if x != 0 {
 		return -x
 	}
-	decimal.Zero.Neg()
 
 	y := aAsserted.orderId - bAsserted.orderId
 	if y == 0 {
