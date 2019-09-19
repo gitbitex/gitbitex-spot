@@ -38,7 +38,8 @@ func (s *Store) GetOrderByIdForUpdate(orderId int64) (*models.Order, error) {
 	return &order, err
 }
 
-func (s *Store) GetOrdersByUserId(userId int64, statuses []string, side string, productId string, count int) ([]*models.Order, error) {
+func (s *Store) GetOrdersByUserId(userId int64, statuses []models.OrderStatus, side *models.Side, productId string,
+	beforeId, afterId int64, limit int) ([]*models.Order, error) {
 	db := s.db.Where("user_id =?", userId)
 
 	if len(statuses) != 0 {
@@ -49,11 +50,18 @@ func (s *Store) GetOrdersByUserId(userId int64, statuses []string, side string, 
 		db = db.Where("product_id=?", productId)
 	}
 
-	if len(side) != 0 {
+	if side != nil {
 		db = db.Where("side=?", side)
 	}
 
-	db = db.Order("id DESC").Limit(count)
+	if beforeId > 0 {
+		db = db.Where("id>?", beforeId)
+	}
+	if afterId > 0 {
+		db = db.Where("id<?", afterId)
+	}
+
+	db = db.Order("id DESC").Limit(limit)
 
 	var orders []*models.Order
 	err := db.Find(&orders).Error

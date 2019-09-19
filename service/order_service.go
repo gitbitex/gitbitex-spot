@@ -245,6 +245,7 @@ func GetOrderById(orderId int64) (*models.Order, error) {
 	return mysql.SharedStore().GetOrderById(orderId)
 }
 
-func GetOrdersByUserId(userId int64, statuses []string, side string, productId string, count int) ([]*models.Order, error) {
-	return mysql.SharedStore().GetOrdersByUserId(userId, statuses, side, productId, count)
+func GetOrdersByUserId(userId int64, statuses []models.OrderStatus, side *models.Side, productId string,
+	beforeId, afterId int64, limit int) ([]*models.Order, error) {
+	return mysql.SharedStore().GetOrdersByUserId(userId, statuses, side, productId, beforeId, afterId, limit)
 }

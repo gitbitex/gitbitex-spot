@@ -73,11 +73,9 @@ func PlaceOrder(ctx *gin.Context) {
 	var req placeOrderRequest
 	err := ctx.BindJSON(&req)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
 		return
 	}
-
-	productId := req.ProductId
 
 	side := models.Side(req.Side)
 	if len(side) == 0 {
@@ -96,7 +94,7 @@ func PlaceOrder(ctx *gin.Context) {
 	price := decimal.NewFromFloat(req.Price)
 	funds := decimal.NewFromFloat(req.Funds)
 
-	order, err := service.PlaceOrder(GetCurrentUser(ctx).Id, productId, orderType, side, size, price, funds)
+	order, err := service.PlaceOrder(GetCurrentUser(ctx).Id, req.ProductId, orderType, side, size, price, funds)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
@@ -110,16 +108,15 @@ func PlaceOrder(ctx *gin.Context) {
 // 撤销指定id的订单
 // DELETE /orders/1
 func CancelOrder(ctx *gin.Context) {
-	orderIdStr := ctx.Param("orderId")
-	orderId, _ := utils.AToInt64(orderIdStr)
+	orderId, _ := utils.AToInt64(ctx.Param("orderId"))
 
 	order, err := service.GetOrderById(orderId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
-	if order == nil {
-		ctx.JSON(http.StatusInternalServerError, newMessageVo(errors.New("order not found")))
+	if order == nil || order.UserId != GetCurrentUser(ctx).Id {
+		ctx.JSON(http.StatusNotFound, newMessageVo(errors.New("order not found")))
 		return
 	}
 
@@ -130,26 +127,23 @@ func CancelOrder(ctx *gin.Context) {
 }
 
 // 批量撤单
-// DELETE /orders/?productId=BTC-USDT&side=[buy,sell,nil]&minPrice=1&maxPrice=2
+// DELETE /orders/?productId=BTC-USDT&side=[buy,sell]
 func CancelOrders(ctx *gin.Context) {
-	productId := ctx.Query("productId")
-	side := ctx.DefaultQuery("side", "")
-	if side == "all" {
-		side = ""
+	productId := ctx.GetString("productId")
+	side, err := models.NewSideFromString(ctx.GetString("side"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
+		return
 	}
-	//minPrice, _ := decimal.NewFromString(ctx.DefaultQuery("minPrice", "0"))
-	//maxPrice, _ := decimal.NewFromString(ctx.DefaultQuery("maxPrice", "99999999999"))
 
-	orders, err := service.GetOrdersByUserId(GetCurrentUser(ctx).Id, []string{string(models.OrderStatusOpen), string(models.OrderStatusNew)}, side, productId, 10000)
+	orders, err := service.GetOrdersByUserId(GetCurrentUser(ctx).Id,
+		[]models.OrderStatus{models.OrderStatusOpen, models.OrderStatusNew}, side, productId, 0, 0, 10000)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
 
 	for _, order := range orders {
-		/*if order.Price.LessThan(minPrice) || order.Price.GreaterThan(maxPrice) {
-			continue
-		}*/
 		order.Status = models.OrderStatusCancelling
 		submitOrder(order)
 	}
@@ -160,19 +154,35 @@ func CancelOrders(ctx *gin.Context) {
 // GET /orders
 func GetOrders(ctx *gin.Context) {
 	productId := ctx.Query("productId")
-	user := GetCurrentUser(ctx)
-	if user == nil {
-		ctx.JSON(http.StatusForbidden, newMessageVo(errors.New("current user not present")))
+
+	side, err := models.NewSideFromString(ctx.GetString("side"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
 		return
 	}
 
-	orderVos := []*orderVo{}
-	orders, err := service.GetOrdersByUserId(user.Id,
-		[]string{string(models.OrderStatusNew), string(models.OrderStatusOpen)}, "", productId, 100)
+	var statuses []models.OrderStatus
+	statusValues := ctx.QueryArray("status")
+	for _, statusValue := range statusValues {
+		status, err := models.NewOrderStatusFromString(statusValue)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, newMessageVo(err))
+			return
+		}
+		statuses = append(statuses, *status)
+	}
+
+	before := ctx.GetInt64("before")
+	after := ctx.GetInt64("after")
+	limit := ctx.GetInt("limit")
+
+	orders, err := service.GetOrdersByUserId(GetCurrentUser(ctx).Id, statuses, side, productId, before, after, limit)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
+
+	var orderVos []*orderVo
 	for _, order := range orders {
 		orderVos = append(orderVos, order2OrderVo(order))
 	}

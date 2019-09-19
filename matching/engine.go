@@ -156,7 +156,8 @@ func (e *Engine) runApplier() {
 				continue
 			}
 
-			logger.Infof("should take snapshot: %v-[%v]-%v->", snapshot.OrderOffset, delta, orderOffset)
+			logger.Infof("should take snapshot: %v %v-[%v]-%v->",
+				e.productId, snapshot.OrderOffset, delta, orderOffset)
 
 			// 执行快照，并将快照数据写入批准chan
 			snapshot.OrderBookSnapshot = e.OrderBook.Snapshot()
@@ -240,8 +241,8 @@ func (e *Engine) runSnapshots() {
 				logger.Warnf("store snapshot failed: %v", err)
 				continue
 			}
-			logger.Infof("new snapshot stored : OrderOffset=%v LogSeq=%v",
-				snapshot.OrderOffset, snapshot.OrderBookSnapshot.LogSeq)
+			logger.Infof("new snapshot stored :product=%v OrderOffset=%v LogSeq=%v",
+				e.productId, snapshot.OrderOffset, snapshot.OrderBookSnapshot.LogSeq)
 
 			// 更新offset用于下一次snapshot请求
 			orderOffset = snapshot.OrderOffset

@@ -15,14 +15,68 @@
 package models
 
 import (
+	"fmt"
 	"github.com/shopspring/decimal"
 	"time"
 )
 
-type OrderType string
+// 用于表示一笔订单或者交易的方向：买，卖
 type Side string
+
+func NewSideFromString(s string) (*Side, error) {
+	side := Side(s)
+	switch side {
+	case SideBuy:
+	case SideSell:
+	default:
+		return nil, fmt.Errorf("invalid side: %v", s)
+	}
+	return &side, nil
+}
+
+func (s Side) Opposite() Side {
+	if s == SideBuy {
+		return SideSell
+	}
+	return SideBuy
+}
+
+func (s Side) String() string {
+	return string(s)
+}
+
+// 订单类型
+type OrderType string
+
+func (t OrderType) String() string {
+	return string(t)
+}
+
+// 用于表示订单状态
 type OrderStatus string
+
+func NewOrderStatusFromString(s string) (*OrderStatus, error) {
+	status := OrderStatus(s)
+	switch status {
+	case OrderStatusNew:
+	case OrderStatusOpen:
+	case OrderStatusCancelling:
+	case OrderStatusCancelled:
+	case OrderStatusFilled:
+	default:
+		return nil, fmt.Errorf("invalid status: %v", s)
+	}
+	return &status, nil
+}
+
+func (t OrderStatus) String() string {
+	return string(t)
+}
+
+// 用于表示账单类型
 type BillType string
+
+// 用于表示一条fill完成的原因
 type DoneReason string
 
 const (
@@ -35,16 +89,18 @@ const (
 	// 初始状态
 	OrderStatusNew = OrderStatus("new")
 	// 已经加入orderBook
-	OrderStatusOpen       = OrderStatus("open")
+	OrderStatusOpen = OrderStatus("open")
+	// 中间状态，请求取消订单
 	OrderStatusCancelling = OrderStatus("cancelling")
-	OrderStatusCancelled  = OrderStatus("cancelled")
-	OrderStatusFilled     = OrderStatus("filled")
+	// 订单已经被取消，部分成交的订单也是cancelled
+	OrderStatusCancelled = OrderStatus("cancelled")
+	// 订单完全成交
+	OrderStatusFilled = OrderStatus("filled")
 
 	BillTypeTrade = BillType("trade")
 
 	DoneReasonFilled    = DoneReason("filled")
 	DoneReasonCancelled = DoneReason("cancelled")
-	DoneReasonRejected  = DoneReason("rejected")
 )
 
 type User struct {
@@ -171,23 +227,4 @@ type Config struct {
 	UpdatedAt time.Time
 	Key       string
 	Value     string
-}
-
-func (s Side) Opposite() Side {
-	if s == SideBuy {
-		return SideSell
-	}
-	return SideBuy
-}
-
-func (s Side) String() string {
-	return string(s)
-}
-
-func (t OrderType) String() string {
-	return string(t)
-}
-
-func (t OrderStatus) String() string {
-	return string(t)
 }

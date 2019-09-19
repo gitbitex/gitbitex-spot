@@ -40,7 +40,8 @@ type Store interface {
 
 	GetOrderById(orderId int64) (*Order, error)
 	GetOrderByIdForUpdate(orderId int64) (*Order, error)
-	GetOrdersByUserId(userId int64, statuses []string, side string, productId string, count int) ([]*Order, error)
+	GetOrdersByUserId(userId int64, statuses []OrderStatus, side *Side, productId string,
+		beforeId, afterId int64, limit int) ([]*Order, error)
 	AddOrder(order *Order) error
 	UpdateOrder(order *Order) error
 	UpdateOrderStatus(orderId int64, oldStatus, newStatus OrderStatus) (bool, error)
