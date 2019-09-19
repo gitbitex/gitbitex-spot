@@ -184,7 +184,7 @@ func (o *orderBook) ApplyOrder(order *models.Order) (logs []Log) {
 			price = makerOrder.Price
 
 			// 计算以当前价格taker的size
-			takerSize := takerOrder.Funds.DivRound(price, o.product.BaseScale)
+			takerSize := takerOrder.Funds.DivRound(price, -o.product.BaseScale)
 			if takerSize.IsZero() {
 				break
 			}
