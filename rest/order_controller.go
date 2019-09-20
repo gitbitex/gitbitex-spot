@@ -130,10 +130,16 @@ func CancelOrder(ctx *gin.Context) {
 // DELETE /orders/?productId=BTC-USDT&side=[buy,sell]
 func CancelOrders(ctx *gin.Context) {
 	productId := ctx.GetString("productId")
-	side, err := models.NewSideFromString(ctx.GetString("side"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
-		return
+
+	var side *models.Side
+	var err error
+	rawSide := ctx.GetString("side")
+	if len(rawSide) > 0 {
+		side, err = models.NewSideFromString(rawSide)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, newMessageVo(err))
+			return
+		}
 	}
 
 	orders, err := service.GetOrdersByUserId(GetCurrentUser(ctx).Id,
