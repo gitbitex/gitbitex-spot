@@ -63,7 +63,7 @@ func newOrderBook(productId string) *orderBook {
 		depths:    map[models.Side]*treemap.Map{},
 		orders:    map[int64]*matching.BookOrder{},
 	}
-	b.depths[models.SideBuy] = treemap.NewWith(utils.DecimalAscComparator)
+	b.depths[models.SideBuy] = treemap.NewWith(utils.DecimalDescComparator)
 	b.depths[models.SideSell] = treemap.NewWith(utils.DecimalAscComparator)
 	return b
 }
