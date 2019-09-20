@@ -169,21 +169,21 @@ func (e *Engine) runCommitter() {
 	for {
 		select {
 		case log := <-e.logCh:
-			// 在恢复snapshot之后，可能会有一部分重复的seq, 丢弃
+			// discard duplicate log
 			if log.GetSeq() <= seq {
-				logger.Infof("discard message seq=%v", seq)
+				logger.Infof("discard log seq=%v", seq)
 				continue
 			}
 
 			seq = log.GetSeq()
 			logs = append(logs, log)
 
-			// chan还有数据可读，并且缓冲区未满，继续读chan
+			// chan is not empty and buffer is not full, continue read.
 			if len(e.logCh) > 0 && len(logs) < 100 {
 				continue
 			}
 
-			// 写入log，并清空缓冲区
+			// store log, clean buffer
 			err := e.logStore.Store(logs)
 			if err != nil {
 				panic(err)

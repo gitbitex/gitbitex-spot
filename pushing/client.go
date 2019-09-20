@@ -139,16 +139,35 @@ func (c *Client) runWriter() {
 }
 
 func (c *Client) runL2ChangeWriter(ctx context.Context) {
-	var resendSnapshot = true
-	var changes []*Level2Change
-	var lastSeq int64 = 0
+	type state struct {
+		resendSnapshot bool
+		changes        []*Level2Change
+		lastSeq        int64
+	}
+	states := map[string]*state{}
+
+	stateOf := func(productId string) *state {
+		s, found := states[productId]
+		if found {
+			return s
+		}
+		s = &state{
+			resendSnapshot: true,
+			changes:        nil,
+			lastSeq:        0,
+		}
+		states[productId] = s
+		return s
+	}
 
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case l2Change := <-c.l2ChangeCh:
-			if resendSnapshot || l2Change.Seq == 0 {
+			state := stateOf(l2Change.ProductId)
+
+			if state.resendSnapshot || l2Change.Seq == 0 {
 				snapshot, err := sharedSnapshotStore().getLastLevel2(l2Change.ProductId)
 				if err != nil {
 					log.Error(err)
@@ -160,14 +179,14 @@ func (c *Client) runL2ChangeWriter(ctx context.Context) {
 				}
 
 				// 最新的snapshot版本太旧了，丢弃，等待更新的snapshot版本
-				if lastSeq > snapshot.Seq {
+				if state.lastSeq > snapshot.Seq {
 					log.Warnf("last snapshot too old: %v changeSeq=%v snapshotSeq=%v",
-						l2Change.ProductId, lastSeq, snapshot.Seq)
+						l2Change.ProductId, state.lastSeq, snapshot.Seq)
 					continue
 				}
 
-				lastSeq = snapshot.Seq
-				resendSnapshot = false
+				state.lastSeq = snapshot.Seq
+				state.resendSnapshot = false
 
 				c.writeCh <- &Level2Message{
 					Type:      Level2TypeSnapshot,
@@ -180,28 +199,28 @@ func (c *Client) runL2ChangeWriter(ctx context.Context) {
 			}
 
 			// 丢弃seq小于snapshot seq的变更
-			if l2Change.Seq <= lastSeq {
-				log.Infof("discard l2changeSeq=%v snapshotSeq=%v", l2Change.Seq, lastSeq)
+			if l2Change.Seq <= state.lastSeq {
+				log.Infof("discard l2changeSeq=%v snapshotSeq=%v", l2Change.Seq, state.lastSeq)
 				continue
 			}
 
 			// seq不连续，发生了消息丢失，重新发送快照
-			if l2Change.Seq != lastSeq+1 {
-				log.Infof("l2change lost newSeq=%v lastSeq=%v", l2Change.Seq, lastSeq)
-				resendSnapshot = true
-				changes = nil
-				lastSeq = l2Change.Seq
+			if l2Change.Seq != state.lastSeq+1 {
+				log.Infof("l2change lost newSeq=%v lastSeq=%v", l2Change.Seq, state.lastSeq)
+				state.resendSnapshot = true
+				state.changes = nil
+				state.lastSeq = l2Change.Seq
 				if len(c.l2ChangeCh) == 0 {
 					c.l2ChangeCh <- &Level2Change{ProductId: l2Change.ProductId}
 				}
 				continue
 			}
 
-			lastSeq = l2Change.Seq
-			changes = append(changes, l2Change)
+			state.lastSeq = l2Change.Seq
+			state.changes = append(state.changes, l2Change)
 
 			// 如果chan还有消息继续读满缓冲区
-			if len(c.l2ChangeCh) > 0 && len(changes) < 10 {
+			if len(c.l2ChangeCh) > 0 && len(state.changes) < 10 {
 				continue
 			}
 
@@ -211,11 +230,11 @@ func (c *Client) runL2ChangeWriter(ctx context.Context) {
 				Asks:      [][3]interface{}{},
 				Bids:      [][3]interface{}{},
 			}
-			for _, change := range changes {
+			for _, change := range state.changes {
 				updateMsg.Changes = append(updateMsg.Changes, [3]interface{}{change.Side, change.Price, change.Size})
 			}
 			c.writeCh <- updateMsg
-			changes = nil
+			state.changes = nil
 		}
 	}
 }
