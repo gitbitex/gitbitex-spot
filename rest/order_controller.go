@@ -155,10 +155,15 @@ func CancelOrders(ctx *gin.Context) {
 func GetOrders(ctx *gin.Context) {
 	productId := ctx.Query("productId")
 
-	side, err := models.NewSideFromString(ctx.GetString("side"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
-		return
+	var side *models.Side
+	var err error
+	rawSide := ctx.GetString("side")
+	if len(rawSide) > 0 {
+		side, err = models.NewSideFromString(rawSide)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, newMessageVo(err))
+			return
+		}
 	}
 
 	var statuses []models.OrderStatus
