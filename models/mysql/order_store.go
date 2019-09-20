@@ -57,8 +57,13 @@ func (s *Store) GetOrdersByUserId(userId int64, statuses []models.OrderStatus, s
 	if beforeId > 0 {
 		db = db.Where("id>?", beforeId)
 	}
+
 	if afterId > 0 {
 		db = db.Where("id<?", afterId)
+	}
+
+	if limit <= 0 {
+		limit = 100
 	}
 
 	db = db.Order("id DESC").Limit(limit)
