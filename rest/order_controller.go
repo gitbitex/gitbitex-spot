@@ -187,7 +187,7 @@ func GetOrders(ctx *gin.Context) {
 		return
 	}
 
-	var orderVos []*orderVo
+	orderVos := []*orderVo{}
 	for _, order := range orders {
 		orderVos = append(orderVos, order2OrderVo(order))
 	}
