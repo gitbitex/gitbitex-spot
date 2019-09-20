@@ -129,7 +129,7 @@ func CancelOrder(ctx *gin.Context) {
 // 批量撤单
 // DELETE /orders/?productId=BTC-USDT&side=[buy,sell]
 func CancelOrders(ctx *gin.Context) {
-	productId := ctx.GetString("productId")
+	productId := ctx.Query("productId")
 
 	var side *models.Side
 	var err error
