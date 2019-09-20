@@ -21,6 +21,7 @@ import (
 	"github.com/gitbitex/gitbitex-spot/conf"
 	"github.com/gitbitex/gitbitex-spot/matching"
 	"github.com/gitbitex/gitbitex-spot/models"
+	"github.com/gitbitex/gitbitex-spot/utils"
 	"github.com/go-redis/redis"
 	"github.com/shopspring/decimal"
 	"sync"
@@ -62,12 +63,13 @@ func newOrderBook(productId string) *orderBook {
 		depths:    map[models.Side]*treemap.Map{},
 		orders:    map[int64]*matching.BookOrder{},
 	}
-	b.depths[models.SideBuy] = treemap.NewWithStringComparator()
-	b.depths[models.SideSell] = treemap.NewWithStringComparator()
+	b.depths[models.SideBuy] = treemap.NewWith(utils.DecimalAscComparator)
+	b.depths[models.SideSell] = treemap.NewWith(utils.DecimalAscComparator)
 	return b
 }
 
-func (s *orderBook) saveOrder(logOffset, logSeq int64, orderId int64, newSize, price decimal.Decimal, side models.Side) *Level2Change {
+func (s *orderBook) saveOrder(logOffset, logSeq int64, orderId int64, newSize, price decimal.Decimal,
+	side models.Side) *Level2Change {
 	if newSize.LessThan(decimal.Zero) {
 		panic(newSize)
 	}
@@ -88,14 +90,14 @@ func (s *orderBook) saveOrder(logOffset, logSeq int64, orderId int64, newSize, p
 			Price:   price,
 		}
 
-		val, found := priceLevels.Get(price.String())
+		val, found := priceLevels.Get(price)
 		if !found {
 			changedLevel = &matching.PriceLevel{
 				Price:      price,
 				Size:       newSize,
 				OrderCount: 1,
 			}
-			priceLevels.Put(price.String(), changedLevel)
+			priceLevels.Put(price, changedLevel)
 		} else {
 			changedLevel = val.(*matching.PriceLevel)
 			changedLevel.Size = changedLevel.Size.Add(newSize)
@@ -113,7 +115,7 @@ func (s *orderBook) saveOrder(logOffset, logSeq int64, orderId int64, newSize, p
 			removed = true
 		}
 
-		val, found := priceLevels.Get(price.String())
+		val, found := priceLevels.Get(price)
 		if !found {
 			panic(fmt.Sprintf("%v %v %v %v", orderId, price, newSize, side))
 		}
@@ -121,7 +123,7 @@ func (s *orderBook) saveOrder(logOffset, logSeq int64, orderId int64, newSize, p
 		changedLevel = val.(*matching.PriceLevel)
 		changedLevel.Size = changedLevel.Size.Sub(decrSize)
 		if changedLevel.Size.IsZero() {
-			priceLevels.Remove(price.String())
+			priceLevels.Remove(price)
 		} else if removed {
 			changedLevel.OrderCount--
 		}
