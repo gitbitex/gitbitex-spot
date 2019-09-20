@@ -126,7 +126,7 @@ func (e *Engine) runApplier() {
 	for {
 		select {
 		case offsetOrder := <-e.orderCh:
-			// 将收到的order放入orderBook
+			// put or cancel order
 			var logs []Log
 			if offsetOrder.Order.Status == models.OrderStatusCancelling {
 				logs = e.OrderBook.CancelOrder(offsetOrder.Order)
@@ -222,13 +222,13 @@ func (e *Engine) runSnapshots() {
 	for {
 		select {
 		case <-time.After(10 * time.Second):
-			// 定时发起snapshot请求，需要携带最后一次快照的offset
+			// make a new snapshot request
 			e.snapshotReqCh <- &Snapshot{
 				OrderOffset: orderOffset,
 			}
 
 		case snapshot := <-e.snapshotCh:
-			// 保存snapshot
+			// store snapshot
 			err := e.snapshotStore.Store(snapshot)
 			if err != nil {
 				logger.Warnf("store snapshot failed: %v", err)
@@ -237,7 +237,7 @@ func (e *Engine) runSnapshots() {
 			logger.Infof("new snapshot stored :product=%v OrderOffset=%v LogSeq=%v",
 				e.productId, snapshot.OrderOffset, snapshot.OrderBookSnapshot.LogSeq)
 
-			// 更新offset用于下一次snapshot请求
+			// update offset for next snapshot request
 			orderOffset = snapshot.OrderOffset
 		}
 	}

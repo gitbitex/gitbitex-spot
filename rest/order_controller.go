@@ -183,11 +183,11 @@ func GetOrders(ctx *gin.Context) {
 		statuses = append(statuses, *status)
 	}
 
-	before := ctx.GetInt64("before")
-	after := ctx.GetInt64("after")
-	limit := ctx.GetInt("limit")
+	before, _ := strconv.ParseInt(ctx.Query("before"), 10, 64)
+	after, _ := strconv.ParseInt(ctx.Query("after"), 10, 64)
+	limit, _ := strconv.ParseInt(ctx.Query("limit"), 10, 64)
 
-	orders, err := service.GetOrdersByUserId(GetCurrentUser(ctx).Id, statuses, side, productId, before, after, limit)
+	orders, err := service.GetOrdersByUserId(GetCurrentUser(ctx).Id, statuses, side, productId, before, after, int(limit))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
