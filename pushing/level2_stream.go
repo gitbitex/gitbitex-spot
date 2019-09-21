@@ -144,18 +144,20 @@ func (s *OrderBookStream) runApplier() {
 }
 
 func (s *OrderBookStream) runSnapshots() {
-	select {
-	case snapshot := <-s.snapshotCh:
-		switch snapshot.(type) {
-		case *OrderBookLevel2Snapshot:
-			err := sharedSnapshotStore().storeLevel2(s.productId, snapshot.(*OrderBookLevel2Snapshot))
-			if err != nil {
-				logger.Error(err)
-			}
-		case *OrderBookFullSnapshot:
-			err := sharedSnapshotStore().storeFull(s.productId, snapshot.(*OrderBookFullSnapshot))
-			if err != nil {
-				logger.Error(err)
+	for {
+		select {
+		case snapshot := <-s.snapshotCh:
+			switch snapshot.(type) {
+			case *OrderBookLevel2Snapshot:
+				err := sharedSnapshotStore().storeLevel2(s.productId, snapshot.(*OrderBookLevel2Snapshot))
+				if err != nil {
+					logger.Error(err)
+				}
+			case *OrderBookFullSnapshot:
+				err := sharedSnapshotStore().storeFull(s.productId, snapshot.(*OrderBookFullSnapshot))
+				if err != nil {
+					logger.Error(err)
+				}
 			}
 		}
 	}
