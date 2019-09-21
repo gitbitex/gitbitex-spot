@@ -188,12 +188,11 @@ func (c *Client) runL2ChangeWriter(ctx context.Context) {
 				state.lastSeq = snapshot.Seq
 				state.resendSnapshot = false
 
-				c.writeCh <- &Level2Message{
+				c.writeCh <- &Level2SnapshotMessage{
 					Type:      Level2TypeSnapshot,
 					ProductId: l2Change.ProductId,
 					Bids:      snapshot.Bids,
 					Asks:      snapshot.Asks,
-					Version:   snapshot.Seq,
 				}
 				continue
 			}
@@ -224,11 +223,9 @@ func (c *Client) runL2ChangeWriter(ctx context.Context) {
 				continue
 			}
 
-			updateMsg := &Level2Message{
+			updateMsg := &Level2UpdateMessage{
 				Type:      Level2TypeUpdate,
 				ProductId: l2Change.ProductId,
-				//Asks:      [][3]interface{}{},
-				//Bids:      [][3]interface{}{},
 			}
 			for _, change := range state.changes {
 				updateMsg.Changes = append(updateMsg.Changes, [3]interface{}{change.Side, change.Price, change.Size})

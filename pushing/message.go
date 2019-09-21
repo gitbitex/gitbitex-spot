@@ -57,13 +57,17 @@ type Response struct {
 	Token      string   `json:"token"`
 }
 
-type Level2Message struct {
+type Level2SnapshotMessage struct {
 	Type      Level2Type       `json:"type"`
 	ProductId string           `json:"productId"`
 	Bids      [][3]interface{} `json:"bids"` // [["6500.15", "0.57753524"]]
 	Asks      [][3]interface{} `json:"asks"`
+}
+
+type Level2UpdateMessage struct {
+	Type      Level2Type       `json:"type"`
+	ProductId string           `json:"productId"`
 	Changes   [][3]interface{} `json:"changes"` // ["buy", "6500.09", "0.84702376"],
-	Version   int64            `json:"version"`
 }
 
 type Level2Change struct {
