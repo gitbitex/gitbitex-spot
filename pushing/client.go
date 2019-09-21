@@ -227,8 +227,8 @@ func (c *Client) runL2ChangeWriter(ctx context.Context) {
 			updateMsg := &Level2Message{
 				Type:      Level2TypeUpdate,
 				ProductId: l2Change.ProductId,
-				Asks:      [][3]interface{}{},
-				Bids:      [][3]interface{}{},
+				//Asks:      [][3]interface{}{},
+				//Bids:      [][3]interface{}{},
 			}
 			for _, change := range state.changes {
 				updateMsg.Changes = append(updateMsg.Changes, [3]interface{}{change.Side, change.Price, change.Size})
