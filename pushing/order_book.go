@@ -213,9 +213,7 @@ func (s *snapshotStore) storeLevel2(productId string, snapshot *OrderBookLevel2S
 	if err != nil {
 		return err
 	}
-
-	ret := s.redisClient.Set(orderBookL2SnapshotKeyPrefix+productId, string(buf), 7*24*time.Hour)
-	return ret.Err()
+	return s.redisClient.Set(orderBookL2SnapshotKeyPrefix+productId, string(buf), 7*24*time.Hour).Err()
 }
 
 func (s *snapshotStore) storeFull(productId string, snapshot *OrderBookFullSnapshot) error {
@@ -223,9 +221,7 @@ func (s *snapshotStore) storeFull(productId string, snapshot *OrderBookFullSnaps
 	if err != nil {
 		return err
 	}
-
-	ret := s.redisClient.Set(orderBookFullSnapshotKeyPrefix+productId, string(buf), 7*24*time.Hour)
-	return ret.Err()
+	return s.redisClient.Set(orderBookFullSnapshotKeyPrefix+productId, string(buf), 7*24*time.Hour).Err()
 }
 
 func (s *snapshotStore) getLastLevel2(productId string) (*OrderBookLevel2Snapshot, error) {
@@ -240,9 +236,6 @@ func (s *snapshotStore) getLastLevel2(productId string) (*OrderBookLevel2Snapsho
 
 	var snapshot OrderBookLevel2Snapshot
 	err = json.Unmarshal([]byte(ret), &snapshot)
-	if err != nil {
-		return nil, err
-	}
 	return &snapshot, err
 }
 
@@ -258,8 +251,5 @@ func (s *snapshotStore) getLastFull(productId string) (*OrderBookFullSnapshot, e
 
 	var snapshot OrderBookFullSnapshot
 	err = json.Unmarshal([]byte(ret), &snapshot)
-	if err != nil {
-		return nil, err
-	}
 	return &snapshot, err
 }
