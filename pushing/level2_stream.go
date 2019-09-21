@@ -22,11 +22,12 @@ import (
 )
 
 type OrderBookStream struct {
-	productId string
-	logReader matching.LogReader
-	logCh     chan *logOffset
-	orderBook *orderBook
-	sub       *subscription
+	productId  string
+	logReader  matching.LogReader
+	logCh      chan *logOffset
+	orderBook  *orderBook
+	sub        *subscription
+	snapshotCh chan interface{}
 }
 
 type logOffset struct {
@@ -36,11 +37,12 @@ type logOffset struct {
 
 func newOrderBookStream(productId string, sub *subscription, logReader matching.LogReader) *OrderBookStream {
 	s := &OrderBookStream{
-		productId: productId,
-		orderBook: newOrderBook(productId),
-		logCh:     make(chan *logOffset, 1000),
-		sub:       sub,
-		logReader: logReader,
+		productId:  productId,
+		orderBook:  newOrderBook(productId),
+		logCh:      make(chan *logOffset, 1000),
+		sub:        sub,
+		logReader:  logReader,
+		snapshotCh: make(chan interface{}, 100),
 	}
 
 	// 恢复snapshot
@@ -63,7 +65,8 @@ func (s *OrderBookStream) Start() {
 		logOffset++
 	}
 	go s.logReader.Run("level2Stream", s.orderBook.logSeq, logOffset)
-	go s.flush()
+	go s.runApplier()
+	go s.runSnapshots()
 }
 
 func (s *OrderBookStream) OnOpenLog(log *matching.OpenLog, offset int64) {
@@ -78,7 +81,7 @@ func (s *OrderBookStream) OnDoneLog(log *matching.DoneLog, offset int64) {
 	s.logCh <- &logOffset{log, offset}
 }
 
-func (s *OrderBookStream) flush() {
+func (s *OrderBookStream) runApplier() {
 	var lastLevel2Snapshot OrderBookLevel2Snapshot
 	var lastFullSnapshot OrderBookFullSnapshot
 
@@ -114,43 +117,45 @@ func (s *OrderBookStream) flush() {
 					log.Price, log.Side)
 			}
 
-			if l2Change != nil {
-				s.sub.publish(ChannelLevel2.FormatWithProductId(s.productId), l2Change)
-			}
-
 			delta := s.orderBook.seq - lastLevel2Snapshot.Seq
 			if delta > 10 {
-				lastLevel2Snapshot = s.orderBook.SnapshotLevel2()
-				err := sharedSnapshotStore().storeLevel2(s.productId, &lastLevel2Snapshot)
-				if err != nil {
-					logger.Error(err)
-				}
+				s.snapshotCh <- s.orderBook.SnapshotLevel2()
 			}
 
 			delta = s.orderBook.seq - lastFullSnapshot.Seq
 			if delta > 10 {
-				lastFullSnapshot = s.orderBook.SnapshotFull()
-				err := sharedSnapshotStore().storeFull(s.productId, &lastFullSnapshot)
-				if err != nil {
-					logger.Error(err)
-				}
+				s.snapshotCh <- s.orderBook.SnapshotFull()
+			}
+
+			if l2Change != nil {
+				s.sub.publish(ChannelLevel2.FormatWithProductId(s.productId), l2Change)
 			}
 
 		case <-time.After(200 * time.Millisecond):
 			if s.orderBook.seq > lastLevel2Snapshot.Seq {
-				lastLevel2Snapshot = s.orderBook.SnapshotLevel2()
-				err := sharedSnapshotStore().storeLevel2(s.productId, &lastLevel2Snapshot)
-				if err != nil {
-					logger.Error(err)
-				}
+				s.snapshotCh <- s.orderBook.SnapshotLevel2()
 			}
 
 			if s.orderBook.seq > lastLevel2Snapshot.Seq {
-				lastFullSnapshot = s.orderBook.SnapshotFull()
-				err := sharedSnapshotStore().storeFull(s.productId, &lastFullSnapshot)
-				if err != nil {
-					logger.Error(err)
-				}
+				s.snapshotCh <- s.orderBook.SnapshotFull()
+			}
+		}
+	}
+}
+
+func (s *OrderBookStream) runSnapshots() {
+	select {
+	case snapshot := <-s.snapshotCh:
+		switch snapshot.(type) {
+		case *OrderBookLevel2Snapshot:
+			err := sharedSnapshotStore().storeLevel2(s.productId, snapshot.(*OrderBookLevel2Snapshot))
+			if err != nil {
+				logger.Error(err)
+			}
+		case *OrderBookFullSnapshot:
+			err := sharedSnapshotStore().storeFull(s.productId, snapshot.(*OrderBookFullSnapshot))
+			if err != nil {
+				logger.Error(err)
 			}
 		}
 	}

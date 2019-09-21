@@ -141,7 +141,7 @@ func (s *orderBook) saveOrder(logOffset, logSeq int64, orderId int64, newSize, p
 	}
 }
 
-func (s *orderBook) SnapshotLevel2() OrderBookLevel2Snapshot {
+func (s *orderBook) SnapshotLevel2() *OrderBookLevel2Snapshot {
 	snapshot := OrderBookLevel2Snapshot{
 		ProductId: s.productId,
 		Seq:       s.seq,
@@ -156,10 +156,10 @@ func (s *orderBook) SnapshotLevel2() OrderBookLevel2Snapshot {
 		v := itr.Value().(*matching.PriceLevel)
 		snapshot.Asks = append(snapshot.Asks, [3]interface{}{v.Price.String(), v.Size.String(), v.OrderCount})
 	}
-	return snapshot
+	return &snapshot
 }
 
-func (s *orderBook) SnapshotFull() OrderBookFullSnapshot {
+func (s *orderBook) SnapshotFull() *OrderBookFullSnapshot {
 	snapshot := OrderBookFullSnapshot{
 		ProductId: s.productId,
 		Seq:       s.seq,
@@ -170,7 +170,7 @@ func (s *orderBook) SnapshotFull() OrderBookFullSnapshot {
 	for _, order := range s.orders {
 		snapshot.Orders = append(snapshot.Orders, *order)
 	}
-	return snapshot
+	return &snapshot
 }
 
 func (s *orderBook) Restore(snapshot *OrderBookFullSnapshot) {
