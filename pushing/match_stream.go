@@ -20,6 +20,7 @@ import (
 	"github.com/gitbitex/gitbitex-spot/service"
 	"github.com/gitbitex/gitbitex-spot/utils"
 	"github.com/shopspring/decimal"
+	"sync"
 	"time"
 )
 
@@ -36,6 +37,7 @@ type MatchStream struct {
 }
 
 var dummyTick = &models.Tick{}
+var lastTickers = sync.Map{}
 
 func newMatchStream(productId string, sub *subscription, logReader matching.LogReader) *MatchStream {
 	s := &MatchStream{
@@ -80,7 +82,7 @@ func (s *MatchStream) OnMatchLog(log *matching.MatchLog, offset int64) {
 
 	// push match
 	s.sub.publish(ChannelMatch.FormatWithProductId(log.ProductId), &MatchMessage{
-		Type:         string(ChannelMatch),
+		Type:         "match",
 		TradeId:      log.TradeId,
 		Sequence:     log.Sequence,
 		Time:         log.Time.Format(time.RFC3339),
@@ -93,7 +95,7 @@ func (s *MatchStream) OnMatchLog(log *matching.MatchLog, offset int64) {
 	})
 
 	// push ticker
-	s.sub.publish(ChannelTicker.FormatWithProductId(log.ProductId), &TickerMessage{
+	ticker := &TickerMessage{
 		Type:      "ticker",
 		TradeId:   log.TradeId,
 		Sequence:  log.Sequence,
@@ -108,7 +110,17 @@ func (s *MatchStream) OnMatchLog(log *matching.MatchLog, offset int64) {
 		Low24h:    s.tick24h.Low.String(),
 		Volume24h: s.tick24h.Volume.String(),
 		Volume30d: s.tick30d.Volume.String(),
-	})
+	}
+	lastTickers.Store(log.ProductId, ticker)
+	s.sub.publish(ChannelTicker.FormatWithProductId(log.ProductId), ticker)
+}
+
+func getLastTicker(productId string) *TickerMessage {
+	ticker, found := lastTickers.Load(productId)
+	if !found {
+		return nil
+	}
+	return ticker.(*TickerMessage)
 }
 
 func refreshTick(tick **models.Tick, granularity int64, log *matching.MatchLog) {

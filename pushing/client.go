@@ -280,7 +280,12 @@ func (c *Client) onSub(currencyIds []string, productIds []string, channels []str
 				c.subscribe(ChannelMatch.FormatWithProductId(productId))
 
 			case ChannelTicker:
-				c.subscribe(ChannelTicker.FormatWithProductId(productId))
+				if c.subscribe(ChannelTicker.FormatWithProductId(productId)) {
+					ticker := getLastTicker(productId)
+					if ticker != nil {
+						c.writeCh <- ticker
+					}
+				}
 
 			case ChannelOrder:
 				c.subscribe(ChannelOrder.Format(productId, userId))
