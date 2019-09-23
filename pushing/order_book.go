@@ -213,37 +213,11 @@ func (s *snapshotStore) storeLevel2(productId string, snapshot *OrderBookLevel2S
 	if err != nil {
 		return err
 	}
-
-	key := productId + "-book-level2"
-	err = s.redisClient.ZRemRangeByRank(key, 0, -10).Err()
-	if err != nil {
-		return err
-	}
-	err = s.redisClient.ZAdd(key, redis.Z{
-		Score:  float64(snapshot.Seq),
-		Member: buf,
-	}).Err()
-	if err != nil {
-		return err
-	}
 	return s.redisClient.Set(orderBookL2SnapshotKeyPrefix+productId, string(buf), 7*24*time.Hour).Err()
 }
 
 func (s *snapshotStore) storeFull(productId string, snapshot *OrderBookFullSnapshot) error {
 	buf, err := json.Marshal(snapshot)
-	if err != nil {
-		return err
-	}
-
-	key := productId + "-book-full"
-	err = s.redisClient.ZRemRangeByRank(key, 0, -10).Err()
-	if err != nil {
-		return err
-	}
-	err = s.redisClient.ZAdd(key, redis.Z{
-		Score:  float64(snapshot.Seq),
-		Member: buf,
-	}).Err()
 	if err != nil {
 		return err
 	}
