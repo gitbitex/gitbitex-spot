@@ -119,12 +119,12 @@ func (s *OrderBookStream) runApplier() {
 
 			if lastLevel2Snapshot == nil || s.orderBook.seq-lastLevel2Snapshot.Seq > 10 {
 				lastLevel2Snapshot = s.orderBook.SnapshotLevel2()
-				s.snapshotCh <- s.orderBook.SnapshotLevel2()
+				s.snapshotCh <- lastLevel2Snapshot
 			}
 
 			if lastFullSnapshot == nil || s.orderBook.seq-lastFullSnapshot.Seq > 10 {
 				lastFullSnapshot = s.orderBook.SnapshotFull()
-				s.snapshotCh <- s.orderBook.SnapshotFull()
+				s.snapshotCh <- lastFullSnapshot
 			}
 
 			if l2Change != nil {
@@ -133,11 +133,13 @@ func (s *OrderBookStream) runApplier() {
 
 		case <-time.After(200 * time.Millisecond):
 			if lastLevel2Snapshot == nil || s.orderBook.seq > lastLevel2Snapshot.Seq {
-				s.snapshotCh <- s.orderBook.SnapshotLevel2()
+				lastLevel2Snapshot = s.orderBook.SnapshotLevel2()
+				s.snapshotCh <- lastLevel2Snapshot
 			}
 
 			if lastFullSnapshot == nil || s.orderBook.seq > lastFullSnapshot.Seq {
-				s.snapshotCh <- s.orderBook.SnapshotFull()
+				lastFullSnapshot = s.orderBook.SnapshotFull()
+				s.snapshotCh <- lastFullSnapshot
 			}
 		}
 	}
