@@ -64,13 +64,14 @@ func GetProductTrades(ctx *gin.Context) {
 func GetProductCandles(ctx *gin.Context) {
 	productId := ctx.Param("productId")
 	granularity, _ := utils.AToInt64(ctx.Query("granularity"))
+	limit, _ := utils.AToInt64(ctx.DefaultQuery("limit", "1000"))
 
 	//[
 	//    [ time, low, high, open, close, volume ],
 	//    [ 1415398768, 0.32, 4.2, 0.35, 4.2, 12.3 ],
 	//]
 	var tickVos [][6]float64
-	ticks, err := service.GetTicksByProductId(productId, granularity/60)
+	ticks, err := service.GetTicksByProductId(productId, granularity/60, int(limit))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return

@@ -23,8 +23,8 @@ func GetLastTickByProductId(productId string, granularity int64) (*models.Tick, 
 	return mysql.SharedStore().GetLastTickByProductId(productId, granularity)
 }
 
-func GetTicksByProductId(productId string, granularity int64) ([]*models.Tick, error) {
-	return mysql.SharedStore().GetTicksByProductId(productId, granularity)
+func GetTicksByProductId(productId string, granularity int64, limit int) ([]*models.Tick, error) {
+	return mysql.SharedStore().GetTicksByProductId(productId, granularity, limit)
 }
 
 func AddTicks(ticks []*models.Tick) error {
