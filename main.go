@@ -22,8 +22,6 @@ import (
 	"github.com/gitbitex/gitbitex-spot/rest"
 	"github.com/gitbitex/gitbitex-spot/service"
 	"github.com/gitbitex/gitbitex-spot/worker"
-	"github.com/prometheus/common/log"
-	"net/http"
 	_ "net/http/pprof"
 )
 
@@ -32,10 +30,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	go func() {
-		log.Info(http.ListenAndServe("localhost:6060", nil))
-	}()
 
 	go models.NewBinLogStream().Start()
 

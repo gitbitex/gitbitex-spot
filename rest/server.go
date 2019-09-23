@@ -15,6 +15,7 @@
 package rest
 
 import (
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 )
@@ -35,6 +36,7 @@ func (server *HttpServer) Start() {
 
 	r := gin.Default()
 
+	pprof.Register(r)
 	r.GET("/api/configs", GetConfigs)
 	r.POST("/api/users", SignUp)
 	r.POST("/api/users/accessToken", SignIn)
