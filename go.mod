@@ -14,7 +14,6 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/emirpasic/gods v1.12.0
 	github.com/etcd-io/gofail v0.0.0-20190801230047-ad7f989257ca // indirect
-	github.com/gin-contrib/pprof v1.2.1
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/go-sql-driver/mysql v1.4.1
