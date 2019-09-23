@@ -65,6 +65,9 @@ func GetProductCandles(ctx *gin.Context) {
 	productId := ctx.Param("productId")
 	granularity, _ := utils.AToInt64(ctx.Query("granularity"))
 	limit, _ := utils.AToInt64(ctx.DefaultQuery("limit", "1000"))
+	if limit <= 0 || limit > 10000 {
+		limit = 1000
+	}
 
 	//[
 	//    [ time, low, high, open, close, volume ],
