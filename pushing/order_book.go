@@ -213,7 +213,7 @@ func (s *snapshotStore) storeLevel2(productId string, snapshot *OrderBookLevel2S
 	if err != nil {
 		return err
 	}
-	return s.redisClient.Set(orderBookL2SnapshotKeyPrefix+productId, string(buf), 7*24*time.Hour).Err()
+	return s.redisClient.Set(orderBookL2SnapshotKeyPrefix+productId, buf, 7*24*time.Hour).Err()
 }
 
 func (s *snapshotStore) storeFull(productId string, snapshot *OrderBookFullSnapshot) error {
@@ -221,11 +221,11 @@ func (s *snapshotStore) storeFull(productId string, snapshot *OrderBookFullSnaps
 	if err != nil {
 		return err
 	}
-	return s.redisClient.Set(orderBookFullSnapshotKeyPrefix+productId, string(buf), 7*24*time.Hour).Err()
+	return s.redisClient.Set(orderBookFullSnapshotKeyPrefix+productId, buf, 7*24*time.Hour).Err()
 }
 
 func (s *snapshotStore) getLastLevel2(productId string) (*OrderBookLevel2Snapshot, error) {
-	ret, err := s.redisClient.Get(orderBookL2SnapshotKeyPrefix + productId).Result()
+	ret, err := s.redisClient.Get(orderBookL2SnapshotKeyPrefix + productId).Bytes()
 	if err != nil {
 		if err == redis.Nil {
 			return nil, nil
@@ -235,12 +235,12 @@ func (s *snapshotStore) getLastLevel2(productId string) (*OrderBookLevel2Snapsho
 	}
 
 	var snapshot OrderBookLevel2Snapshot
-	err = json.Unmarshal([]byte(ret), &snapshot)
+	err = json.Unmarshal(ret, &snapshot)
 	return &snapshot, err
 }
 
 func (s *snapshotStore) getLastFull(productId string) (*OrderBookFullSnapshot, error) {
-	ret, err := s.redisClient.Get(orderBookFullSnapshotKeyPrefix + productId).Result()
+	ret, err := s.redisClient.Get(orderBookFullSnapshotKeyPrefix + productId).Bytes()
 	if err != nil {
 		if err == redis.Nil {
 			return nil, nil
@@ -250,6 +250,6 @@ func (s *snapshotStore) getLastFull(productId string) (*OrderBookFullSnapshot, e
 	}
 
 	var snapshot OrderBookFullSnapshot
-	err = json.Unmarshal([]byte(ret), &snapshot)
+	err = json.Unmarshal(ret, &snapshot)
 	return &snapshot, err
 }

@@ -58,15 +58,15 @@ func (s *RedisSnapshotStore) Store(snapshot *Snapshot) error {
 }
 
 func (s *RedisSnapshotStore) GetLatest() (*Snapshot, error) {
-	ret := s.redisClient.Get(topicSnapshotPrefix + s.productId)
-	if ret.Err() != nil {
-		if ret.Err() == redis.Nil {
+	ret, err := s.redisClient.Get(topicSnapshotPrefix + s.productId).Bytes()
+	if err != nil {
+		if err == redis.Nil {
 			return nil, nil
 		}
-		return nil, ret.Err()
+		return nil, err
 	}
 
 	var snapshot Snapshot
-	err := json.Unmarshal([]byte(ret.Val()), &snapshot)
+	err = json.Unmarshal(ret, &snapshot)
 	return &snapshot, err
 }

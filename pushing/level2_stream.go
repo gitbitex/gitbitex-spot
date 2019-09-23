@@ -136,11 +136,6 @@ func (s *OrderBookStream) runApplier() {
 				lastLevel2Snapshot = s.orderBook.SnapshotLevel2()
 				s.snapshotCh <- lastLevel2Snapshot
 			}
-
-			/*if lastFullSnapshot == nil || s.orderBook.seq > lastFullSnapshot.Seq {
-				lastFullSnapshot = s.orderBook.SnapshotFull()
-				s.snapshotCh <- lastFullSnapshot
-			}*/
 		}
 	}
 }
