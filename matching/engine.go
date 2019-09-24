@@ -190,7 +190,7 @@ func (e *Engine) runCommitter() {
 			}
 			logs = nil
 
-			// 如果还有未批准的snapshot，需要检测snapshot是否可以批准，即写入的seq已经达到或者超过snapshot请求的seq
+			// approve pending snapshot
 			if pending != nil && seq >= pending.OrderBookSnapshot.LogSeq {
 				e.snapshotCh <- pending
 				pending = nil

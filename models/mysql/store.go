@@ -19,6 +19,8 @@ import (
 	"github.com/gitbitex/gitbitex-spot/conf"
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/jinzhu/gorm"
+	"github.com/prometheus/common/log"
+	"reflect"
 	"sync"
 )
 
@@ -68,24 +70,25 @@ func initDb() error {
 		return "g_" + defaultTableName
 	}
 
-	// disable this in production mode
-	/*var tables = []interface{}{
-		&models.Account{},
-		&models.Order{},
-		&models.Product{},
-		&models.Trade{},
-		&models.Fill{},
-		&models.User{},
-		&models.Bill{},
-		&models.Tick{},
-		&models.Config{},
-	}
-	for _, table := range tables {
-		log.Warnf("migrating database, table: %v", reflect.TypeOf(table))
-		if err = gdb.AutoMigrate(table).Error; err != nil {
-			return err
+	if cfg.DataSource.EnableAutoMigrate {
+		var tables = []interface{}{
+			&models.Account{},
+			&models.Order{},
+			&models.Product{},
+			&models.Trade{},
+			&models.Fill{},
+			&models.User{},
+			&models.Bill{},
+			&models.Tick{},
+			&models.Config{},
 		}
-	}*/
+		for _, table := range tables {
+			log.Infof("migrating database, table: %v", reflect.TypeOf(table))
+			if err = gdb.AutoMigrate(table).Error; err != nil {
+				return err
+			}
+		}
+	}
 
 	return nil
 }

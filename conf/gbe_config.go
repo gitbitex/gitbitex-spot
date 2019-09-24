@@ -29,11 +29,12 @@ type GbeConfig struct {
 }
 
 type DataSourceConfig struct {
-	DriverName string `json:"driverName"`
-	Addr       string `json:"addr"`
-	Database   string `json:"database"`
-	User       string `json:"user"`
-	Password   string `json:"password"`
+	DriverName        string `json:"driverName"`
+	Addr              string `json:"addr"`
+	Database          string `json:"database"`
+	User              string `json:"user"`
+	Password          string `json:"password"`
+	EnableAutoMigrate bool   `json:"enableAutoMigrate"`
 }
 
 type RedisConfig struct {
