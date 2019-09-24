@@ -4,7 +4,8 @@
     "addr": "127.0.0.1:3306",
     "database": "spot",
     "user": "root",
-    "password": ""
+    "password": "",
+    "enableAutoMigrate": false
   },
   "redis": {
     "addr": ":6379",
