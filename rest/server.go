@@ -52,6 +52,7 @@ func (server *HttpServer) Start() {
 		private.GET("/api/accounts", GetAccounts)
 		private.GET("/api/users/self", GetUsersSelf)
 		private.DELETE("/api/users/accessToken", SignOut)
+		private.GET("/wallets/{currency}/address", GetWalletAddress)
 
 	}
 

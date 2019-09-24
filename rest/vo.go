@@ -112,6 +112,16 @@ type userVo struct {
 	CreatedAt    string `json:"createdAt"`
 }
 
+type walletAddressVo struct {
+	Address string `json:"address"`
+}
+
+type transactionVo struct {
+	Id       string `json:"id"`
+	Currency string `json:"currency"`
+	Amount   string `json:"amount"`
+}
+
 func trade2TradeVo(trade *models.Trade) *tradeVo {
 	return &tradeVo{
 		Time:    trade.Time.Format(time.RFC3339),
