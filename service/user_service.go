@@ -35,7 +35,7 @@ func init() {
 	gbeConfig = cfg
 }
 
-func SignUp(email, password string) (*models.User, error) {
+func CreateUser(email, password string) (*models.User, error) {
 	user, err := GetUserByEmail(email)
 	if err != nil {
 		return nil, err
@@ -48,11 +48,7 @@ func SignUp(email, password string) (*models.User, error) {
 		Email:        email,
 		PasswordHash: encryptPassword(password),
 	}
-	err = mysql.SharedStore().AddUser(user)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+	return user, mysql.SharedStore().AddUser(user)
 }
 
 func RefreshAccessToken(email, password string) (string, error) {
@@ -68,9 +64,10 @@ func RefreshAccessToken(email, password string) (string, error) {
 	}
 
 	claim := jwt.MapClaims{
-		"id":        user.Id,
-		"email":     user.Email,
-		"expiredAt": time.Now().Unix(),
+		"id":           user.Id,
+		"email":        user.Email,
+		"passwordHash": user.PasswordHash,
+		"expiredAt":    time.Now().Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	return token.SignedString([]byte(gbeConfig.JwtSecret))
@@ -92,19 +89,46 @@ func CheckToken(tokenStr string) (*models.User, error) {
 	}
 
 	email := claim["email"].(string)
+	passwordHash := claim["passwordHash"].(string)
 
 	user, err := GetUserByEmail(email)
 	if err != nil {
 		return nil, err
 	}
 	if user == nil {
-		return nil, errors.New("bad token")
+		return nil, errors.New("bad token: 0x1")
+	}
+	if user.PasswordHash != passwordHash {
+		return nil, errors.New("bad token: 0x2")
 	}
 	return user, nil
 }
 
+func ChangePassword(email, newPassword string) error {
+	user, err := GetUserByEmail(email)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return errors.New("user not found")
+	}
+	user.PasswordHash = encryptPassword(newPassword)
+	return mysql.SharedStore().UpdateUser(user)
+}
+
 func GetUserByEmail(email string) (*models.User, error) {
 	return mysql.SharedStore().GetUserByEmail(email)
+}
+
+func GetUserByPassword(email, password string) (*models.User, error) {
+	user, err := GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil || user.PasswordHash != encryptPassword(password) {
+		return nil, errors.New("user not found or password incorrect")
+	}
+	return user, nil
 }
 
 func encryptPassword(password string) string {

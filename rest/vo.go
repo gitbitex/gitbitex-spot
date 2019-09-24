@@ -103,6 +103,11 @@ type SignUpRequest struct {
 	Password string
 }
 
+type changePasswordRequest struct {
+	OldPassword string
+	NewPassword string
+}
+
 type userVo struct {
 	Id           string `json:"id"`
 	Email        string `json:"email"`

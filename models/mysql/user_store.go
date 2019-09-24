@@ -33,3 +33,8 @@ func (s *Store) AddUser(user *models.User) error {
 	user.CreatedAt = time.Now()
 	return s.db.Create(user).Error
 }
+
+func (s *Store) UpdateUser(user *models.User) error {
+	return s.db.Save(user).Error
+
+}

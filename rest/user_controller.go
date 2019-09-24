@@ -30,7 +30,7 @@ func SignUp(ctx *gin.Context) {
 		return
 	}
 
-	_, err = service.SignUp(request.Email, request.Password)
+	_, err = service.CreateUser(request.Email, request.Password)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
 		return
@@ -55,6 +55,32 @@ func SignIn(ctx *gin.Context) {
 
 	ctx.SetCookie("accessToken", token, 7*24*60*60, "/", "*", false, false)
 	ctx.JSON(http.StatusOK, token)
+}
+
+// POST /users/password
+func ChangePassword(ctx *gin.Context) {
+	var req changePasswordRequest
+	err := ctx.BindJSON(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
+		return
+	}
+
+	// check old password
+	_, err = service.GetUserByPassword(GetCurrentUser(ctx).Email, req.OldPassword)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
+		return
+	}
+
+	// change password
+	err = service.ChangePassword(GetCurrentUser(ctx).Email, req.NewPassword)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, nil)
 }
 
 // DELETE /users/accessToken

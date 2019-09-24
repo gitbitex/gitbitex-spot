@@ -23,6 +23,7 @@ type Store interface {
 
 	GetUserByEmail(email string) (*User, error)
 	AddUser(user *User) error
+	UpdateUser(user *User) error
 
 	GetAccount(userId int64, currency string) (*Account, error)
 	GetAccountsByUserId(userId int64) ([]*Account, error)
