@@ -52,9 +52,9 @@ func (server *HttpServer) Start() {
 		private.GET("/api/accounts", GetAccounts)
 		private.GET("/api/users/self", GetUsersSelf)
 		private.DELETE("/api/users/accessToken", SignOut)
-		private.GET("/wallets/:currency/address", GetWalletAddress)
-		private.GET("/wallets/:currency/transactions", GetWalletTransactions)
-		private.GET("/wallets/:currency/withdrawal", Withdrawal)
+		private.GET("/api/wallets/:currency/address", GetWalletAddress)
+		private.GET("/api/wallets/:currency/transactions", GetWalletTransactions)
+		private.GET("/api/wallets/:currency/withdrawal", Withdrawal)
 	}
 
 	err := r.Run(server.addr)
