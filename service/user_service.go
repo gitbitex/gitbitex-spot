@@ -88,8 +88,17 @@ func CheckToken(tokenStr string) (*models.User, error) {
 		return nil, errors.New("token is invalid")
 	}
 
-	email := claim["email"].(string)
-	passwordHash := claim["passwordHash"].(string)
+	emailVal, found := claim["email"]
+	if !found {
+		return nil, errors.New("bad token")
+	}
+	email := emailVal.(string)
+
+	passwordHashVal, found := claim["passwordHash"]
+	if !found {
+		return nil, errors.New("bad token")
+	}
+	passwordHash := passwordHashVal.(string)
 
 	user, err := GetUserByEmail(email)
 	if err != nil {
