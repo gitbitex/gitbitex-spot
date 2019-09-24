@@ -54,7 +54,7 @@ func (server *HttpServer) Start() {
 		private.DELETE("/api/users/accessToken", SignOut)
 		private.GET("/api/wallets/:currency/address", GetWalletAddress)
 		private.GET("/api/wallets/:currency/transactions", GetWalletTransactions)
-		private.GET("/api/wallets/:currency/withdrawal", Withdrawal)
+		private.POST("/api/wallets/:currency/withdrawal", Withdrawal)
 	}
 
 	err := r.Run(server.addr)
