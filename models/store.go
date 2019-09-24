@@ -39,6 +39,7 @@ type Store interface {
 	GetProducts() ([]*Product, error)
 
 	GetOrderById(orderId int64) (*Order, error)
+	GetOrderByClientOid(userId int64, clientOid string) (*Order, error)
 	GetOrderByIdForUpdate(orderId int64) (*Order, error)
 	GetOrdersByUserId(userId int64, statuses []OrderStatus, side *Side, productId string,
 		beforeId, afterId int64, limit int) ([]*Order, error)

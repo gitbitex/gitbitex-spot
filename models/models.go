@@ -156,6 +156,7 @@ type Order struct {
 	UpdatedAt     time.Time
 	ProductId     string
 	UserId        int64
+	ClientOid     string
 	Size          decimal.Decimal `sql:"type:decimal(32,16);"`
 	Funds         decimal.Decimal `sql:"type:decimal(32,16);"`
 	FilledSize    decimal.Decimal `sql:"type:decimal(32,16);"`

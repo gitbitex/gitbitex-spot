@@ -24,7 +24,7 @@ import (
 	"log"
 )
 
-func PlaceOrder(userId int64, productId string, orderType models.OrderType, side models.Side,
+func PlaceOrder(userId int64, clientOid string, productId string, orderType models.OrderType, side models.Side,
 	size, price, funds decimal.Decimal) (*models.Order, error) {
 	product, err := GetProductById(productId)
 	if err != nil {
@@ -73,6 +73,7 @@ func PlaceOrder(userId int64, productId string, orderType models.OrderType, side
 	}
 
 	order := &models.Order{
+		ClientOid: clientOid,
 		UserId:    userId,
 		ProductId: product.Id,
 		Side:      side,
@@ -243,6 +244,10 @@ func ExecuteFill(orderId int64) error {
 
 func GetOrderById(orderId int64) (*models.Order, error) {
 	return mysql.SharedStore().GetOrderById(orderId)
+}
+
+func GetOrderByClientOid(userId int64, clientOid string) (*models.Order, error) {
+	return mysql.SharedStore().GetOrderByClientOid(userId, clientOid)
 }
 
 func GetOrdersByUserId(userId int64, statuses []models.OrderStatus, side *models.Side, productId string,
