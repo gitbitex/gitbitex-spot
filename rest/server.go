@@ -48,7 +48,6 @@ func (server *HttpServer) Start() {
 		private.GET("/api/orders", GetOrders)
 		private.POST("/api/orders", PlaceOrder)
 		private.DELETE("/api/orders/:orderId", CancelOrder)
-		private.DELETE("/api/orders/client:clientOid", CancelOrderByClientOid)
 		private.DELETE("/api/orders", CancelOrders)
 		private.GET("/api/accounts", GetAccounts)
 		private.GET("/api/users/self", GetUsersSelf)

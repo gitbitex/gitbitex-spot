@@ -31,6 +31,7 @@ import (
 	"github.com/siddontang/go-log/log"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -119,34 +120,23 @@ func PlaceOrder(ctx *gin.Context) {
 // 撤销指定id的订单
 // DELETE /orders/1
 func CancelOrder(ctx *gin.Context) {
-	orderId, _ := utils.AToInt64(ctx.Param("orderId"))
+	rawOrderId := ctx.Param("orderId")
 
-	order, err := service.GetOrderById(orderId)
+	var order *models.Order
+	var err error
+	if strings.HasPrefix(rawOrderId, "client:") {
+		clientOid := strings.Split(rawOrderId, ":")[1]
+		order, err = service.GetOrderByClientOid(GetCurrentUser(ctx).Id, clientOid)
+	} else {
+		orderId, _ := utils.AToInt64(rawOrderId)
+		order, err = service.GetOrderById(orderId)
+	}
+
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
-	if order == nil || order.UserId != GetCurrentUser(ctx).Id {
-		ctx.JSON(http.StatusNotFound, newMessageVo(errors.New("order not found")))
-		return
-	}
 
-	order.Status = models.OrderStatusCancelling
-	submitOrder(order)
-
-	ctx.JSON(http.StatusOK, nil)
-}
-
-// CancelOrder cancel order by client_oid
-// DELETE /orders/client:<client_oid>
-func CancelOrderByClientOid(ctx *gin.Context) {
-	clientOid := ctx.Param("clientOid")
-
-	order, err := service.GetOrderByClientOid(GetCurrentUser(ctx).Id, clientOid)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
-		return
-	}
 	if order == nil || order.UserId != GetCurrentUser(ctx).Id {
 		ctx.JSON(http.StatusNotFound, newMessageVo(errors.New("order not found")))
 		return
