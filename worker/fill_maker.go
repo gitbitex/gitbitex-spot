@@ -109,7 +109,7 @@ func (t *FillMaker) flusher() {
 		case fill := <-t.fillCh:
 			fills = append(fills, fill)
 
-			if len(t.fillCh) > 0 && len(fills) < 100 {
+			if len(t.fillCh) > 0 && len(fills) < 1000 {
 				continue
 			}
 

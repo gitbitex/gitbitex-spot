@@ -113,7 +113,7 @@ func (t *TickMaker) flusher() {
 		case tick := <-t.tickCh:
 			ticks = append(ticks, &tick)
 
-			if len(t.tickCh) > 0 && len(ticks) < 100 {
+			if len(t.tickCh) > 0 && len(ticks) < 1000 {
 				continue
 			}
 

@@ -88,7 +88,7 @@ func (t *TradeMaker) runFlusher() {
 		case trade := <-t.tradeCh:
 			trades = append(trades, trade)
 
-			if len(t.tradeCh) > 0 && len(trades) < 100 {
+			if len(t.tradeCh) > 0 && len(trades) < 1000 {
 				continue
 			}
 
