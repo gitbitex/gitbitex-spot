@@ -54,7 +54,7 @@ func newMatchStream(productId string, sub *subscription, logReader matching.LogR
 		s.tick24h = tick24h
 	}
 	tick30d, err := service.GetLastTickByProductId(productId, 30*24*60)
-	if err != nil || tick30d == nil {
+	if err != nil && tick30d != nil {
 		s.tick30d = tick30d
 	}
 
