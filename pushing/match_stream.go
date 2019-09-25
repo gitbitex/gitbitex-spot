@@ -46,7 +46,7 @@ func newMatchStream(productId string, sub *subscription, logReader matching.LogR
 		logReader: logReader,
 	}
 
-	// 加载最新的24h，30d的tick数据
+	// load last 24h tick
 	tick24h, err := service.GetLastTickByProductId(productId, 24*60)
 	if err != nil {
 		log.Error(err)
@@ -55,6 +55,7 @@ func newMatchStream(productId string, sub *subscription, logReader matching.LogR
 		s.tick24h = tick24h
 	}
 
+	// load last 30d tick
 	tick30d, err := service.GetLastTickByProductId(productId, 30*24*60)
 	if err != nil {
 		log.Error(err)
@@ -62,7 +63,6 @@ func newMatchStream(productId string, sub *subscription, logReader matching.LogR
 	if tick30d != nil {
 		s.tick30d = tick30d
 	}
-	log.Infof("%v %v", s.tick24h, s.tick30d)
 
 	s.logReader.RegisterObserver(s)
 	return s
@@ -82,7 +82,7 @@ func (s *MatchStream) OnDoneLog(log *matching.DoneLog, offset int64) {
 }
 
 func (s *MatchStream) OnMatchLog(log *matching.MatchLog, offset int64) {
-	// 更新tick
+	// refresh tick for next ticker
 	refreshTick(&s.tick24h, 24*60, log)
 	refreshTick(&s.tick30d, 30*24*60, log)
 
@@ -130,8 +130,9 @@ func getLastTicker(productId string) *TickerMessage {
 }
 
 func refreshTick(tick **models.Tick, granularity int64, log *matching.MatchLog) {
-	startPos := log.Time.UTC().Truncate(time.Duration(granularity) * time.Minute).Unix()
-	if *tick == nil || (*tick).Time != startPos {
+	tickTime := log.Time.UTC().Truncate(time.Duration(granularity) * time.Minute).Unix()
+
+	if *tick == nil || (*tick).Time != tickTime {
 		*tick = &models.Tick{
 			Open:        log.Price,
 			Close:       log.Price,
@@ -140,7 +141,7 @@ func refreshTick(tick **models.Tick, granularity int64, log *matching.MatchLog) 
 			Volume:      log.Size,
 			ProductId:   log.ProductId,
 			Granularity: granularity,
-			Time:        startPos,
+			Time:        tickTime,
 		}
 	} else {
 		(*tick).Close = log.Price

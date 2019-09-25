@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-var T = []int64{1, 3, 5, 15, 30, 60, 120, 240, 360, 720, 1440}
+var minutes = []int64{1, 3, 5, 15, 30, 60, 120, 240, 360, 720, 1440}
 
 type TickMaker struct {
 	ticks     map[int64]*models.Tick
@@ -41,7 +41,7 @@ func NewTickMaker(productId string, logReader matching.LogReader) *TickMaker {
 	}
 
 	// 加载数据库中记录的最新tick
-	for _, granularity := range T {
+	for _, granularity := range minutes {
 		tick, err := service.GetLastTickByProductId(productId, granularity)
 		if err != nil {
 			panic(err)
@@ -75,11 +75,11 @@ func (t *TickMaker) OnDoneLog(log *matching.DoneLog, offset int64) {
 }
 
 func (t *TickMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
-	for _, granularity := range T {
-		startPos := log.Time.UTC().Truncate(time.Duration(granularity) * time.Minute).Unix()
+	for _, granularity := range minutes {
+		tickTime := log.Time.UTC().Truncate(time.Duration(granularity) * time.Minute).Unix()
 
 		tick, found := t.ticks[granularity]
-		if !found || tick.Time != startPos {
+		if !found || tick.Time != tickTime {
 			tick = &models.Tick{
 				Open:        log.Price,
 				Close:       log.Price,
@@ -88,7 +88,7 @@ func (t *TickMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
 				Volume:      log.Size,
 				ProductId:   log.ProductId,
 				Granularity: granularity,
-				Time:        startPos,
+				Time:        tickTime,
 				LogOffset:   offset,
 				LogSeq:      log.Sequence,
 			}

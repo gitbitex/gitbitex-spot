@@ -45,7 +45,7 @@ func newOrderBookStream(productId string, sub *subscription, logReader matching.
 		snapshotCh: make(chan interface{}, 100),
 	}
 
-	// 恢复snapshot
+	// try restore snapshot
 	snapshot, err := sharedSnapshotStore().getLastFull(productId)
 	if err != nil {
 		panic(err)
