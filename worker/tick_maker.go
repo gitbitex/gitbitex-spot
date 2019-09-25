@@ -79,7 +79,7 @@ func (t *TickMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
 	for _, granularity := range minutes {
 		tickTime := log.Time.UTC().Truncate(time.Duration(granularity) * time.Minute).Unix()
 		if granularity == 1440 {
-			fmt.Printf("%v %v\n", log.Time.UTC(), tickTime)
+			fmt.Printf("%+v %v\n", log, tickTime)
 		}
 
 		tick, found := t.ticks[granularity]
