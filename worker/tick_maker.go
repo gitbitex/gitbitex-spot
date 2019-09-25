@@ -18,8 +18,8 @@ import (
 	"github.com/gitbitex/gitbitex-spot/matching"
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/gitbitex/gitbitex-spot/service"
-	"github.com/prometheus/common/log"
 	"github.com/shopspring/decimal"
+	"github.com/siddontang/go-log/log"
 	"time"
 )
 
@@ -42,11 +42,12 @@ func NewTickMaker(productId string, logReader matching.LogReader) *TickMaker {
 
 	// 加载数据库中记录的最新tick
 	for _, granularity := range T {
-		tick, err := service.GetLastTickByProductId(productId, granularity*60)
+		tick, err := service.GetLastTickByProductId(productId, granularity)
 		if err != nil {
 			panic(err)
 		}
 		if tick != nil {
+			log.Infof("load last tick: %v", tick)
 			t.ticks[granularity] = tick
 			t.logOffset = tick.LogOffset
 			t.logSeq = tick.LogSeq
