@@ -20,6 +20,7 @@ import (
 	"github.com/gitbitex/gitbitex-spot/service"
 	"github.com/gitbitex/gitbitex-spot/utils"
 	"github.com/shopspring/decimal"
+	"github.com/siddontang/go-log/log"
 	"sync"
 	"time"
 )
@@ -36,14 +37,11 @@ type MatchStream struct {
 	logReader         matching.LogReader
 }
 
-var dummyTick = &models.Tick{}
 var lastTickers = sync.Map{}
 
 func newMatchStream(productId string, sub *subscription, logReader matching.LogReader) *MatchStream {
 	s := &MatchStream{
 		productId: productId,
-		tick24h:   dummyTick,
-		tick30d:   dummyTick,
 		sub:       sub,
 		logReader: logReader,
 	}
@@ -57,6 +55,7 @@ func newMatchStream(productId string, sub *subscription, logReader matching.LogR
 	if err != nil && tick30d != nil {
 		s.tick30d = tick30d
 	}
+	log.Info("%v %v", s.tick24h, s.tick30d)
 
 	s.logReader.RegisterObserver(s)
 	return s
@@ -125,7 +124,7 @@ func getLastTicker(productId string) *TickerMessage {
 
 func refreshTick(tick **models.Tick, granularity int64, log *matching.MatchLog) {
 	startPos := log.Time.UTC().Truncate(time.Duration(granularity) * time.Minute).Unix()
-	if *tick == dummyTick || (*tick).Time != startPos {
+	if *tick == nil || (*tick).Time != startPos {
 		*tick = &models.Tick{
 			Open:        log.Price,
 			Close:       log.Price,
