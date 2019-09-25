@@ -36,8 +36,8 @@ func StartServer() {
 		panic(err)
 	}
 	for _, product := range products {
-		newMatchStream(product.Id, sub, matching.NewKafkaLogReader(product.Id, gbeConfig.Kafka.Brokers)).Start()
-		newOrderBookStream(product.Id, sub, matching.NewKafkaLogReader(product.Id, gbeConfig.Kafka.Brokers)).Start()
+		newMatchStream(product.Id, sub, matching.NewKafkaLogReader("matchStream", product.Id, gbeConfig.Kafka.Brokers)).Start()
+		newOrderBookStream(product.Id, sub, matching.NewKafkaLogReader("orderBookStream", product.Id, gbeConfig.Kafka.Brokers)).Start()
 	}
 
 	go NewServer(gbeConfig.PushServer.Addr, gbeConfig.PushServer.Path, sub).Run()

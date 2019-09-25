@@ -64,7 +64,7 @@ func newMatchStream(productId string, sub *subscription, logReader matching.LogR
 
 func (s *MatchStream) Start() {
 	// -1 表示从最后的offset读取
-	go s.logReader.Run("matchStream", 0, -1)
+	go s.logReader.Run(0, -1)
 }
 
 func (s *MatchStream) OnOpenLog(log *matching.OpenLog, offset int64) {

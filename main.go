@@ -50,9 +50,9 @@ func main() {
 		panic(err)
 	}
 	for _, product := range products {
-		worker.NewTickMaker(product.Id, matching.NewKafkaLogReader(product.Id, gbeConfig.Kafka.Brokers)).Start()
-		worker.NewFillMaker(matching.NewKafkaLogReader(product.Id, gbeConfig.Kafka.Brokers)).Start()
-		worker.NewTradeMaker(matching.NewKafkaLogReader(product.Id, gbeConfig.Kafka.Brokers)).Start()
+		worker.NewTickMaker(product.Id, matching.NewKafkaLogReader("tickMaker", product.Id, gbeConfig.Kafka.Brokers)).Start()
+		worker.NewFillMaker(matching.NewKafkaLogReader("fillMaker", product.Id, gbeConfig.Kafka.Brokers)).Start()
+		worker.NewTradeMaker(matching.NewKafkaLogReader("tradeMaker", product.Id, gbeConfig.Kafka.Brokers)).Start()
 	}
 
 	rest.StartServer()

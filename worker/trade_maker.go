@@ -53,7 +53,7 @@ func (t *TradeMaker) Start() {
 	if t.logOffset > 0 {
 		t.logOffset++
 	}
-	go t.logReader.Run("tradeMaker", t.logSeq, t.logOffset)
+	go t.logReader.Run(t.logSeq, t.logOffset)
 	go t.runFlusher()
 }
 

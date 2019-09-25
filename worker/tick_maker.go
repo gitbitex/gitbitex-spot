@@ -62,7 +62,7 @@ func (t *TickMaker) Start() {
 	if t.logOffset > 0 {
 		t.logOffset++
 	}
-	go t.logReader.Run("tickMaker", t.logSeq, t.logOffset)
+	go t.logReader.Run(t.logSeq, t.logOffset)
 	go t.flusher()
 }
 

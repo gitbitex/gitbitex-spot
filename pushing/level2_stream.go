@@ -64,7 +64,7 @@ func (s *OrderBookStream) Start() {
 	if logOffset > 0 {
 		logOffset++
 	}
-	go s.logReader.Run("level2Stream", s.orderBook.logSeq, logOffset)
+	go s.logReader.Run(s.orderBook.logSeq, logOffset)
 	go s.runApplier()
 	go s.runSnapshots()
 }

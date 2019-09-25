@@ -36,7 +36,7 @@ func NewKafkaLogReader(readerId, productId string, brokers []string) LogReader {
 		MinBytes:  1,
 		MaxBytes:  10e6,
 	})
-	return &KafkaLogReader{productId: productId, reader: reader}
+	return &KafkaLogReader{readerId: readerId, productId: productId, reader: reader}
 }
 
 func (r *KafkaLogReader) GetProductId() string {
