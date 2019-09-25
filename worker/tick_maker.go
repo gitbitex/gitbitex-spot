@@ -15,6 +15,7 @@
 package worker
 
 import (
+	"fmt"
 	"github.com/gitbitex/gitbitex-spot/matching"
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/gitbitex/gitbitex-spot/service"
@@ -76,6 +77,9 @@ func (t *TickMaker) OnDoneLog(log *matching.DoneLog, offset int64) {
 func (t *TickMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
 	for _, granularity := range T {
 		startPos := log.Time.UTC().Truncate(time.Duration(granularity) * time.Minute).Unix()
+		if granularity == 1440 {
+			fmt.Println(startPos)
+		}
 
 		tick, found := t.ticks[granularity]
 		if !found || tick.Time != startPos {
