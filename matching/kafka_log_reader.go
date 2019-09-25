@@ -47,7 +47,7 @@ func (r *KafkaLogReader) RegisterObserver(observer LogObserver) {
 }
 
 func (r *KafkaLogReader) Run(readerId string, seq, offset int64) {
-	logger.Infof("%v read from %v", readerId, offset)
+	logger.Infof("%v-%v read from %v", r.productId, readerId, offset)
 
 	var lastSeq = seq
 
