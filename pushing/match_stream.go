@@ -26,15 +26,13 @@ import (
 )
 
 type MatchStream struct {
-	productId         string
-	sub               *subscription
-	bestBid           decimal.Decimal
-	bestAsk           decimal.Decimal
-	tick24h           *models.Tick
-	tick30d           *models.Tick
-	lastMatchOuterMsg *matching.Base
-	lastMatchMsg      *matching.MatchLog
-	logReader         matching.LogReader
+	productId string
+	sub       *subscription
+	bestBid   decimal.Decimal
+	bestAsk   decimal.Decimal
+	tick24h   *models.Tick
+	tick30d   *models.Tick
+	logReader matching.LogReader
 }
 
 var lastTickers = sync.Map{}
@@ -69,7 +67,7 @@ func newMatchStream(productId string, sub *subscription, logReader matching.LogR
 }
 
 func (s *MatchStream) Start() {
-	// -1 表示从最后的offset读取
+	// -1 : read from end
 	go s.logReader.Run(0, -1)
 }
 
