@@ -76,7 +76,7 @@ func (t *TickMaker) OnDoneLog(log *matching.DoneLog, offset int64) {
 
 func (t *TickMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
 	for _, granularity := range minutes {
-		tickTime := log.Time.UTC().Truncate(time.Duration(granularity) * time.Minute).Local().Unix()
+		tickTime := log.Time.UTC().Truncate(time.Duration(granularity) * time.Minute).Unix()
 
 		tick, found := t.ticks[granularity]
 		if !found || tick.Time != tickTime {
