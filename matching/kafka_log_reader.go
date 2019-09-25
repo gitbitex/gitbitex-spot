@@ -22,12 +22,13 @@ import (
 )
 
 type KafkaLogReader struct {
+	readerId  string
 	productId string
 	reader    *kafka.Reader
 	observer  LogObserver
 }
 
-func NewKafkaLogReader(productId string, brokers []string) LogReader {
+func NewKafkaLogReader(readerId, productId string, brokers []string) LogReader {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:   brokers,
 		Topic:     topicBookMessagePrefix + productId,
@@ -46,8 +47,8 @@ func (r *KafkaLogReader) RegisterObserver(observer LogObserver) {
 	r.observer = observer
 }
 
-func (r *KafkaLogReader) Run(readerId string, seq, offset int64) {
-	logger.Infof("%v-%v read from %v", r.productId, readerId, offset)
+func (r *KafkaLogReader) Run(seq, offset int64) {
+	logger.Infof("%v:%v read from %v", r.productId, r.readerId, offset)
 
 	var lastSeq = seq
 
@@ -71,7 +72,7 @@ func (r *KafkaLogReader) Run(readerId string, seq, offset int64) {
 
 		if base.Sequence <= lastSeq {
 			// 丢弃重复的log
-			logger.Infof("discard log :%+v", base)
+			logger.Infof("%v:%v discard log :%+v", r.readerId, r.productId, base)
 			continue
 		} else if lastSeq > 0 && base.Sequence != lastSeq+1 {
 			// seq发生不连续，可能是撮合引擎发生了严重错误
