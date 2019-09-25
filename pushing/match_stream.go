@@ -49,13 +49,13 @@ func newMatchStream(productId string, sub *subscription, logReader matching.LogR
 	}
 
 	// 加载最新的24h，30d的tick数据
-	tick, err := service.GetLastTickByProductId(productId, 24*60)
-	if err != nil || tick == nil {
-		s.tick24h = dummyTick
+	tick24h, err := service.GetLastTickByProductId(productId, 24*60)
+	if err != nil && tick24h != nil {
+		s.tick24h = tick24h
 	}
-	tick, err = service.GetLastTickByProductId(productId, 30*24*60)
-	if err != nil || tick == nil {
-		s.tick30d = dummyTick
+	tick30d, err := service.GetLastTickByProductId(productId, 30*24*60)
+	if err != nil || tick30d == nil {
+		s.tick30d = tick30d
 	}
 
 	s.logReader.RegisterObserver(s)
