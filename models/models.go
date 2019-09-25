@@ -79,6 +79,8 @@ type BillType string
 // 用于表示一条fill完成的原因
 type DoneReason string
 
+type TransactionStatus string
+
 const (
 	OrderTypeLimit  = OrderType("limit")
 	OrderTypeMarket = OrderType("market")
@@ -228,4 +230,18 @@ type Config struct {
 	UpdatedAt time.Time
 	Key       string
 	Value     string
+}
+
+type Transaction struct {
+	Id          int64 `gorm:"column:id;primary_key;AUTO_INCREMENT"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	UserId      int64
+	Currency    string
+	BlockNum    int
+	ConfirmNum  int
+	Status      TransactionStatus
+	FromAddress string
+	ToAddress   string
+	Note        string
 }

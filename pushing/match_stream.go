@@ -124,7 +124,7 @@ func getLastTicker(productId string) *TickerMessage {
 }
 
 func refreshTick(tick **models.Tick, granularity int64, log *matching.MatchLog) {
-	startPos := utils.StartPosOfTime(log.Time.Unix(), granularity)
+	startPos := log.Time.UTC().Truncate(time.Duration(granularity) * time.Minute).Unix()
 	if *tick == dummyTick || (*tick).Time != startPos {
 		*tick = &models.Tick{
 			Open:        log.Price,

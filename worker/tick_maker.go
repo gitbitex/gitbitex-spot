@@ -18,7 +18,6 @@ import (
 	"github.com/gitbitex/gitbitex-spot/matching"
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/gitbitex/gitbitex-spot/service"
-	"github.com/gitbitex/gitbitex-spot/utils"
 	"github.com/prometheus/common/log"
 	"github.com/shopspring/decimal"
 	"time"
@@ -28,7 +27,7 @@ var T = []int64{1, 3, 5, 15, 30, 60, 120, 240, 360, 720, 1440}
 
 type TickMaker struct {
 	ticks     map[int64]*models.Tick
-	tickCh    chan *models.Tick
+	tickCh    chan models.Tick
 	logReader matching.LogReader
 	logOffset int64
 	logSeq    int64
@@ -37,7 +36,7 @@ type TickMaker struct {
 func NewTickMaker(productId string, logReader matching.LogReader) *TickMaker {
 	t := &TickMaker{
 		ticks:     map[int64]*models.Tick{},
-		tickCh:    make(chan *models.Tick, 1000),
+		tickCh:    make(chan models.Tick, 1000),
 		logReader: logReader,
 	}
 
@@ -76,7 +75,7 @@ func (t *TickMaker) OnDoneLog(log *matching.DoneLog, offset int64) {
 
 func (t *TickMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
 	for _, granularity := range T {
-		startPos := utils.StartPosOfTime(log.Time.Unix(), granularity)
+		startPos := log.Time.UTC().Truncate(time.Duration(granularity) * time.Minute).Unix()
 
 		tick, found := t.ticks[granularity]
 		if !found || tick.Time != startPos {
@@ -102,7 +101,7 @@ func (t *TickMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
 			tick.LogSeq = log.Sequence
 		}
 
-		t.tickCh <- tick
+		t.tickCh <- *tick
 	}
 }
 
@@ -112,7 +111,7 @@ func (t *TickMaker) flusher() {
 	for {
 		select {
 		case tick := <-t.tickCh:
-			ticks = append(ticks, tick)
+			ticks = append(ticks, &tick)
 
 			if len(t.tickCh) > 0 && len(ticks) < 100 {
 				continue
