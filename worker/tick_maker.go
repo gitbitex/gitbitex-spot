@@ -77,8 +77,8 @@ func (t *TickMaker) OnDoneLog(log *matching.DoneLog, offset int64) {
 func (t *TickMaker) OnMatchLog(log *matching.MatchLog, offset int64) {
 	for _, granularity := range T {
 		startPos := log.Time.UTC().Truncate(time.Duration(granularity) * time.Minute).Unix()
-		if granularity == 1440 {
-			fmt.Println(startPos)
+		if t.logReader.GetProductId() == "BTC-USDT" && granularity == 1440 {
+			fmt.Printf("%v %v", log.Time, startPos)
 		}
 
 		tick, found := t.ticks[granularity]
