@@ -24,19 +24,23 @@ import (
 	"time"
 )
 
+const intervalSec = 3
+
 type TickerStream struct {
-	productId string
-	sub       *subscription
-	bestBid   decimal.Decimal
-	bestAsk   decimal.Decimal
-	logReader matching.LogReader
+	productId      string
+	sub            *subscription
+	bestBid        decimal.Decimal
+	bestAsk        decimal.Decimal
+	logReader      matching.LogReader
+	lastTickerTime int64
 }
 
 func newTickerStream(productId string, sub *subscription, logReader matching.LogReader) *TickerStream {
 	s := &TickerStream{
-		productId: productId,
-		sub:       sub,
-		logReader: logReader,
+		productId:      productId,
+		sub:            sub,
+		logReader:      logReader,
+		lastTickerTime: time.Now().Unix() - intervalSec,
 	}
 	s.logReader.RegisterObserver(s)
 	return s
@@ -56,10 +60,7 @@ func (s *TickerStream) OnDoneLog(log *matching.DoneLog, offset int64) {
 }
 
 func (s *TickerStream) OnMatchLog(log *matching.MatchLog, offset int64) {
-	var interval int64 = 3
-	var lastTickerTime = time.Now().Unix() - interval
-
-	if time.Now().Unix()-lastTickerTime > interval {
+	if time.Now().Unix()-s.lastTickerTime > intervalSec {
 		ticker, err := s.newTickerMessage(log)
 		if err != nil {
 			logger.Error(err)
@@ -70,7 +71,7 @@ func (s *TickerStream) OnMatchLog(log *matching.MatchLog, offset int64) {
 		}
 		lastTickers.Store(log.ProductId, ticker)
 		s.sub.publish(ChannelTicker.FormatWithProductId(log.ProductId), ticker)
-		lastTickerTime = time.Now().Unix()
+		s.lastTickerTime = time.Now().Unix()
 	}
 }
 
