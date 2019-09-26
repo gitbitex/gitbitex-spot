@@ -120,7 +120,7 @@ func mergeTicks(ticks []*models.Tick) *models.Tick {
 			t.Close = tick.Close
 			t.Low = decimal.Min(t.Low, tick.Low)
 			t.High = decimal.Max(t.High, tick.High)
-			t.Volume = t.Volume.Add(t.Volume)
+			t.Volume = t.Volume.Add(tick.Volume)
 		}
 	}
 	return t
