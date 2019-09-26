@@ -36,6 +36,9 @@ func init() {
 }
 
 func CreateUser(email, password string) (*models.User, error) {
+	if len(password) < 6 {
+		return nil, errors.New("password must be of minimum 6 characters length")
+	}
 	user, err := GetUserByEmail(email)
 	if err != nil {
 		return nil, err
@@ -141,6 +144,6 @@ func GetUserByPassword(email, password string) (*models.User, error) {
 }
 
 func encryptPassword(password string) string {
-	hash := md5.New().Sum([]byte(password))
+	hash := md5.Sum([]byte(password))
 	return fmt.Sprintf("%x", hash)
 }
