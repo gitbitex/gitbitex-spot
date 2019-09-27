@@ -31,7 +31,7 @@ func GetProducts(ctx *gin.Context) {
 
 	var productVos []*ProductVo
 	for _, product := range products {
-		productVos = append(productVos, product2ProductVo(product))
+		productVos = append(productVos, newProductVo(product))
 	}
 
 	ctx.JSON(http.StatusOK, productVos)
@@ -54,7 +54,7 @@ func GetProductTrades(ctx *gin.Context) {
 	var tradeVos []*tradeVo
 	trades, _ := service.GetTradesByProductId(productId, 50)
 	for _, trade := range trades {
-		tradeVos = append(tradeVos, trade2TradeVo(trade))
+		tradeVos = append(tradeVos, newTradeVo(trade))
 	}
 
 	ctx.JSON(http.StatusOK, tradeVos)

@@ -119,6 +119,7 @@ func PlaceOrder(ctx *gin.Context) {
 
 // 撤销指定id的订单
 // DELETE /orders/1
+// DELETE /orders/client:1
 func CancelOrder(ctx *gin.Context) {
 	rawOrderId := ctx.Param("orderId")
 
@@ -217,7 +218,7 @@ func GetOrders(ctx *gin.Context) {
 
 	orderVos := []*orderVo{}
 	for _, order := range orders {
-		orderVos = append(orderVos, order2OrderVo(order))
+		orderVos = append(orderVos, newOrderVo(order))
 	}
 
 	var newBefore, newAfter int64 = 0, 0

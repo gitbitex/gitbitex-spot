@@ -36,7 +36,7 @@ func GetAccounts(ctx *gin.Context) {
 				continue
 			}
 
-			accountVos = append(accountVos, Account2AccountVo(account))
+			accountVos = append(accountVos, newAccountVo(account))
 		}
 	} else {
 		accounts, err := service.GetAccountsByUserId(GetCurrentUser(ctx).Id)
@@ -45,7 +45,7 @@ func GetAccounts(ctx *gin.Context) {
 			return
 		}
 		for _, account := range accounts {
-			accountVos = append(accountVos, Account2AccountVo(account))
+			accountVos = append(accountVos, newAccountVo(account))
 		}
 	}
 	ctx.JSON(http.StatusOK, accountVos)

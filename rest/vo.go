@@ -121,13 +121,61 @@ type walletAddressVo struct {
 	Address string `json:"address"`
 }
 
-type transactionVo struct {
-	Id       string `json:"id"`
-	Currency string `json:"currency"`
-	Amount   string `json:"amount"`
+type networkVo struct {
+	Status        string `json:"status"`
+	Hash          string `json:"hash"`
+	Amount        string `json:"amount"`
+	FeeAmount     string `json:"feeAmount"`
+	FeeCurrency   string `json:"feeCurrency"`
+	Confirmations int    `json:"confirmations"`
+	ResourceUrl   string `json:"resourceUrl"`
 }
 
-func trade2TradeVo(trade *models.Trade) *tradeVo {
+type transactionVo struct {
+	Id             string    `json:"id"`
+	Currency       string    `json:"currency"`
+	Amount         string    `json:"amount"`
+	Type           string    `json:"type"`
+	Status         string    `json:"status"`
+	Price          string    `json:"price"`
+	NativeCurrency string    `json:"nativeCurrency"`
+	NativeAmount   string    `json:"nativeAmount"`
+	Description    string    `json:"description"`
+	CreatedAt      string    `json:"createdAt"`
+	UpdatedAt      string    `json:"updatedAt"`
+	FromAddress    string    `json:"fromAddress"`
+	ToAddress      string    `json:"toAddress"`
+	Network        networkVo `json:"network"`
+}
+
+func newTransactionVo() *transactionVo {
+	return &transactionVo{
+		Id:             "1",
+		Currency:       "BTC",
+		Amount:         "0.1",
+		Type:           "send",
+		Status:         "pending",
+		Price:          "8000",
+		NativeCurrency: "USD",
+		NativeAmount:   "8000",
+		Description:    "withdraw btc",
+		CreatedAt:      time.Now().Format(time.RFC3339),
+		UpdatedAt:      time.Now().Format(time.RFC3339),
+		FromAddress:    "0x3A3E32423AE323242",
+		ToAddress:      "0x4B3E32423AE323242",
+		Network: networkVo{
+			Status:        "confirmed",
+			Hash:          "0x23423AA3232",
+			Amount:        "0.1",
+			FeeAmount:     "0.1",
+			FeeCurrency:   "BTC",
+			Confirmations: 0,
+			ResourceUrl:   "",
+		},
+	}
+}
+
+func newTradeVo(trade *models.Trade) *tradeVo {
 	return &tradeVo{
 		Time:    trade.Time.Format(time.RFC3339),
 		TradeId: trade.Id,
@@ -137,7 +185,7 @@ func trade2TradeVo(trade *models.Trade) *tradeVo {
 	}
 }
 
-func product2ProductVo(product *models.Product) *ProductVo {
+func newProductVo(product *models.Product) *ProductVo {
 	return &ProductVo{
 		Id:             product.Id,
 		BaseCurrency:   product.BaseCurrency,
@@ -150,7 +198,7 @@ func product2ProductVo(product *models.Product) *ProductVo {
 	}
 }
 
-func order2OrderVo(order *models.Order) *orderVo {
+func newOrderVo(order *models.Order) *orderVo {
 	return &orderVo{
 		Id:            utils.I64ToA(order.Id),
 		Price:         order.Price.String(),
@@ -168,7 +216,7 @@ func order2OrderVo(order *models.Order) *orderVo {
 	}
 }
 
-func Account2AccountVo(account *models.Account) *AccountVo {
+func newAccountVo(account *models.Account) *AccountVo {
 	return &AccountVo{
 		Id:           fmt.Sprintf("%v", account.Id),
 		Currency:     account.Currency,

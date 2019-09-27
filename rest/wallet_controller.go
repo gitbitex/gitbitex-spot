@@ -12,7 +12,14 @@ func GetWalletAddress(ctx *gin.Context) {
 
 // GET /wallets/{currency}/transactions
 func GetWalletTransactions(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, nil)
+	currency := ctx.Param("currency")
+
+	transactionVos := []*transactionVo{}
+	if currency == "BTC" {
+		transactionVos = append(transactionVos, newTransactionVo())
+	}
+
+	ctx.JSON(http.StatusOK, transactionVos)
 }
 
 // POST /wallets/{currency}/withdrawal

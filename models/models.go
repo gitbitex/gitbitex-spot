@@ -103,6 +103,9 @@ const (
 
 	DoneReasonFilled    = DoneReason("filled")
 	DoneReasonCancelled = DoneReason("cancelled")
+
+	TransactionStatusPending   = TransactionStatus("pending")
+	TransactionStatusCompleted = TransactionStatus("completed")
 )
 
 type User struct {
@@ -244,4 +247,5 @@ type Transaction struct {
 	FromAddress string
 	ToAddress   string
 	Note        string
+	TxId        string
 }
