@@ -57,6 +57,23 @@ func SignIn(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, token)
 }
 
+// POST /users/token
+func GetToken(ctx *gin.Context) {
+	var request SignUpRequest
+	err := ctx.BindJSON(&request)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
+		return
+	}
+
+	token, err := service.RefreshAccessToken(request.Email, request.Password)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, token)
+}
+
 // POST /users/password
 func ChangePassword(ctx *gin.Context) {
 	var req changePasswordRequest
