@@ -18,9 +18,9 @@ https://gitbitex.com:8080/trade/BTC-USDT
 * Redis
 
 ## Install
+* git clone https://github.com/gitbitex/gitbitex-spot.git
 * Create database and make sure **BINLOG[ROW format]** enabled
 * Execute ddl.sql
-* git clone https://github.com/gitbitex/gitbitex-spot.git
 * Modify conf.json
 * Run go build
 * Run ./gitbitex-spot
