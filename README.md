@@ -9,3 +9,17 @@ GitBitEx is an open source cryptocurrency exchange.
 ## Demo
 https://gitbitex.com:8080/trade/BTC-USDT
 
+## Dependencies
+* MySql (**BINLOG[ROW format]** enabled)
+* Kafka
+* Redis
+
+## Install
+* Create database and make sure **BINLOG[ROW format]** enabled
+* Execute ddl.sql
+* Modify conf.json
+* Run go build
+* Run ./gitbitex-spot
+
+## Problems?
+Please let me know if you have any problems. You can submit an issue or send me an email (greensheng2001@gmail.com)
