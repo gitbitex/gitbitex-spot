@@ -9,6 +9,7 @@ GitBitEx is an open source cryptocurrency exchange.
 
 ## Demo
 We deployed a demo version on a cloud server (2 Cores CPU 4G RAM). All programs run on this server. include (mysql,kafka,redis,gitbitex-spot,nginx,web...).
+
 https://gitbitex.com:8080/trade/BTC-USDT
 
 ## Dependencies
