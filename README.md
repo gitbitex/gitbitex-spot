@@ -20,6 +20,7 @@ https://gitbitex.com:8080/trade/BTC-USDT
 ## Install
 * Create database and make sure **BINLOG[ROW format]** enabled
 * Execute ddl.sql
+* git clone https://github.com/gitbitex/gitbitex-spot.git
 * Modify conf.json
 * Run go build
 * Run ./gitbitex-spot
