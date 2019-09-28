@@ -141,18 +141,18 @@ func (s *orderBook) saveOrder(logOffset, logSeq int64, orderId int64, newSize, p
 	}
 }
 
-func (s *orderBook) SnapshotLevel2() *OrderBookLevel2Snapshot {
+func (s *orderBook) SnapshotLevel2(levels int) *OrderBookLevel2Snapshot {
 	snapshot := OrderBookLevel2Snapshot{
 		ProductId: s.productId,
 		Seq:       s.seq,
 		Asks:      [][3]interface{}{},
 		Bids:      [][3]interface{}{},
 	}
-	for itr := s.depths[models.SideBuy].Iterator(); itr.Next(); {
+	for itr, i := s.depths[models.SideBuy].Iterator(), 0; itr.Next() && i < levels; i++ {
 		v := itr.Value().(*matching.PriceLevel)
 		snapshot.Bids = append(snapshot.Bids, [3]interface{}{v.Price.String(), v.Size.String(), v.OrderCount})
 	}
-	for itr := s.depths[models.SideSell].Iterator(); itr.Next(); {
+	for itr, i := s.depths[models.SideSell].Iterator(), 0; itr.Next() && i < levels; i++ {
 		v := itr.Value().(*matching.PriceLevel)
 		snapshot.Asks = append(snapshot.Asks, [3]interface{}{v.Price.String(), v.Size.String(), v.OrderCount})
 	}
