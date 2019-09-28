@@ -23,5 +23,5 @@
   "restServer": {
     "addr": ":8001"
   },
-  "jwtToken": "flj23jfoi23apdl3jfslkj23za01mf3"
+  "jwtSecret": "flj23jfoi23apdl3jfslkj23za01mf3"
 }
