@@ -4,6 +4,7 @@
 
 GitBitEx is an open source cryptocurrency exchange.
 
+## Architecture
 <p align="center"><img width="100%" src="https://oooooo.oss-cn-hangzhou.aliyuncs.com/gitbitex.png?v=1" /></p>
 
 ## Demo
