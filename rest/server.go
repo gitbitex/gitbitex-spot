@@ -34,6 +34,7 @@ func (server *HttpServer) Start() {
 	gin.DefaultWriter = ioutil.Discard
 
 	r := gin.Default()
+	r.Use(setCROSOptions)
 
 	r.GET("/api/configs", GetConfigs)
 	r.POST("/api/users", SignUp)
@@ -63,4 +64,12 @@ func (server *HttpServer) Start() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func setCROSOptions(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
+	c.Header("Access-Control-Allow-Headers", "*")
+	c.Header("Allow", "HEAD,GET,POST,PUT,PATCH,DELETE,OPTIONS")
+	c.Header("Content-Type", "application/json")
 }
