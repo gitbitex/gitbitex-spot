@@ -33,4 +33,4 @@ https://gitbitex.com:8080/trade/BTC-USDT
 
 
 ## Problems?
-Please let me know if you have any problems. You can submit an issue or send me an email (greensheng2001@gmail.com)
+Please let me know if you have any problems. You can submit an issue or send me an email (greensheng2001@gmail.com) or Telegram (https://t.me/greensheng)
