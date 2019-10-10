@@ -145,7 +145,7 @@ func (e *Engine) runApplier() {
 		case snapshot := <-e.snapshotReqCh:
 			// 接收到快照请求，判断是否真的需要执行快照
 			delta := orderOffset - snapshot.OrderOffset
-			if delta <= 10000 {
+			if delta <= 1000 {
 				continue
 			}
 
