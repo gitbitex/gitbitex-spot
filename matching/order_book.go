@@ -65,19 +65,6 @@ type orderBookSnapshot struct {
 	OrderIdWindow Window
 }
 
-type depth struct {
-	// 保存所有正在book上的order
-	orders map[int64]*BookOrder
-
-	// 价格优先的priceLevel队列，用于获取level2
-	// Price -> *PriceLevel
-	levels *treemap.Map
-
-	// 价格优先，时间优先的订单队列，用于订单match
-	// priceOrderIdKey -> orderId
-	queue *treemap.Map
-}
-
 type PriceLevel struct {
 	Price      decimal.Decimal
 	Size       decimal.Decimal
@@ -339,6 +326,19 @@ func (o *orderBook) nextLogSeq() int64 {
 func (o *orderBook) nextTradeSeq() int64 {
 	o.tradeSeq++
 	return o.tradeSeq
+}
+
+type depth struct {
+	// 保存所有正在book上的order
+	orders map[int64]*BookOrder
+
+	// 价格优先的priceLevel队列，用于获取level2
+	// Price -> *PriceLevel
+	levels *treemap.Map
+
+	// 价格优先，时间优先的订单队列，用于订单match
+	// priceOrderIdKey -> orderId
+	queue *treemap.Map
 }
 
 func (d *depth) add(order BookOrder) {

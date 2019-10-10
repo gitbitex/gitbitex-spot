@@ -122,7 +122,7 @@ func (s *OrderBookStream) runApplier() {
 				s.snapshotCh <- lastLevel2Snapshot
 			}
 
-			if lastFullSnapshot == nil || s.orderBook.seq-lastFullSnapshot.Seq > 1000 {
+			if lastFullSnapshot == nil || s.orderBook.seq-lastFullSnapshot.Seq > 10000 {
 				lastFullSnapshot = s.orderBook.SnapshotFull()
 				s.snapshotCh <- lastFullSnapshot
 			}
