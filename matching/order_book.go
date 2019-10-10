@@ -289,17 +289,20 @@ func (o *orderBook) CancelOrder(order *models.Order) (logs []Log) {
 
 func (o *orderBook) Snapshot() orderBookSnapshot {
 	snapshot := orderBookSnapshot{
-		Orders:        []BookOrder{},
+		Orders:        make([]BookOrder, len(o.depths[models.SideSell].orders)+len(o.depths[models.SideBuy].orders)),
 		LogSeq:        o.logSeq,
 		TradeSeq:      o.tradeSeq,
 		OrderIdWindow: o.orderIdWindow,
 	}
 
+	i := 0
 	for _, order := range o.depths[models.SideSell].orders {
-		snapshot.Orders = append(snapshot.Orders, *order)
+		snapshot.Orders[i] = *order
+		i++
 	}
 	for _, order := range o.depths[models.SideBuy].orders {
-		snapshot.Orders = append(snapshot.Orders, *order)
+		snapshot.Orders[i] = *order
+		i++
 	}
 
 	return snapshot

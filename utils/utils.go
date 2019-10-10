@@ -65,6 +65,13 @@ func DToF64(d decimal.Decimal) float64 {
 	return f
 }
 
+func MinInt(a, b int) int {
+	if a <= b {
+		return a
+	}
+	return b
+}
+
 func SnakeCase(s string) string {
 	in := []rune(s)
 	isLower := func(idx int) bool {

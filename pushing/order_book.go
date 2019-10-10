@@ -145,8 +145,8 @@ func (s *orderBook) SnapshotLevel2(levels int) *OrderBookLevel2Snapshot {
 	snapshot := OrderBookLevel2Snapshot{
 		ProductId: s.productId,
 		Seq:       s.seq,
-		Asks:      [][3]interface{}{},
-		Bids:      [][3]interface{}{},
+		Asks:      make([][3]interface{}, utils.MinInt(levels, s.depths[models.SideBuy].Size())),
+		Bids:      make([][3]interface{}, utils.MinInt(levels, s.depths[models.SideSell].Size())),
 	}
 	for itr, i := s.depths[models.SideBuy].Iterator(), 0; itr.Next() && i < levels; i++ {
 		v := itr.Value().(*matching.PriceLevel)
@@ -165,10 +165,13 @@ func (s *orderBook) SnapshotFull() *OrderBookFullSnapshot {
 		Seq:       s.seq,
 		LogOffset: s.logOffset,
 		LogSeq:    s.logSeq,
-		Orders:    []matching.BookOrder{},
+		Orders:    make([]matching.BookOrder, len(s.orders)),
 	}
+
+	i := 0
 	for _, order := range s.orders {
-		snapshot.Orders = append(snapshot.Orders, *order)
+		snapshot.Orders[i] = *order
+		i++
 	}
 	return &snapshot
 }
