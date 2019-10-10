@@ -18,12 +18,19 @@ https://gitbitex.com:8080/trade/BTC-USDT
 * Redis
 
 ## Install
+### Server
 * git clone https://github.com/gitbitex/gitbitex-spot.git
 * Create database and make sure **BINLOG[ROW format]** enabled
 * Execute ddl.sql
 * Modify conf.json
 * Run go build
 * Run ./gitbitex-spot
+### Web
+* git clone https://github.com/gitbitex/gitbitex-web.git
+* Run `npm install`
+* Run `npm start`
+* Run `npm run build` to build production
+
 
 ## Problems?
-Please let me know if you have any problems. You can submit an issue or send me an email (greensheng2001@gmail.com)
+Please let me know if you have any problems. You can submit an issue or send me an email (greensheng2001@gmail.com) or Telegram (https://t.me/greensheng)
