@@ -145,8 +145,8 @@ func (s *orderBook) SnapshotLevel2(levels int) *OrderBookLevel2Snapshot {
 	snapshot := OrderBookLevel2Snapshot{
 		ProductId: s.productId,
 		Seq:       s.seq,
-		Asks:      make([][3]interface{}, utils.MinInt(levels, s.depths[models.SideBuy].Size())),
-		Bids:      make([][3]interface{}, utils.MinInt(levels, s.depths[models.SideSell].Size())),
+		Asks:      make([][3]interface{}, utils.MinInt(levels, s.depths[models.SideSell].Size())),
+		Bids:      make([][3]interface{}, utils.MinInt(levels, s.depths[models.SideBuy].Size())),
 	}
 	for itr, i := s.depths[models.SideBuy].Iterator(), 0; itr.Next() && i < levels; i++ {
 		v := itr.Value().(*matching.PriceLevel)
