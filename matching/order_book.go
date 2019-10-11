@@ -137,8 +137,8 @@ func (o *orderBook) ApplyOrder(order *models.Order) (logs []Log) {
 		makerOrder := makerDepth.orders[orderId]
 
 		// 判断taker和maker是否发生价格交叉
-		if (takerOrder.Side == models.SideBuy && takerOrder.Price.Cmp(makerOrder.Price) < 0) ||
-			(takerOrder.Side == models.SideSell && takerOrder.Price.Cmp(makerOrder.Price) > 0) {
+		if (takerOrder.Side == models.SideBuy && takerOrder.Price.LessThan(makerOrder.Price)) ||
+			(takerOrder.Side == models.SideSell && takerOrder.Price.GreaterThan(makerOrder.Price)) {
 			break
 		}
 

@@ -48,7 +48,7 @@ func newOrderBookStream(productId string, sub *subscription, logReader matching.
 	// try restore snapshot
 	snapshot, err := sharedSnapshotStore().getLastFull(productId)
 	if err != nil {
-		panic(err)
+		logger.Fatalf("get snapshot error: %v", err)
 	}
 	if snapshot != nil {
 		s.orderBook.Restore(snapshot)

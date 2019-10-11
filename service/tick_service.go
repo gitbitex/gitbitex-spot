@@ -28,5 +28,8 @@ func GetTicksByProductId(productId string, granularity int64, limit int) ([]*mod
 }
 
 func AddTicks(ticks []*models.Tick) error {
+	if len(ticks) == 0 {
+		return nil
+	}
 	return mysql.SharedStore().AddTicks(ticks)
 }

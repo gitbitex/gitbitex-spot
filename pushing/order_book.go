@@ -186,6 +186,7 @@ func (s *orderBook) Restore(snapshot *OrderBookFullSnapshot) {
 	s.logSeq = snapshot.LogSeq
 }
 
+// snapshotStore is used to manage snapshots
 type snapshotStore struct {
 	redisClient *redis.Client
 }
@@ -219,14 +220,6 @@ func (s *snapshotStore) storeLevel2(productId string, snapshot *OrderBookLevel2S
 	return s.redisClient.Set(orderBookL2SnapshotKeyPrefix+productId, buf, 7*24*time.Hour).Err()
 }
 
-func (s *snapshotStore) storeFull(productId string, snapshot *OrderBookFullSnapshot) error {
-	buf, err := json.Marshal(snapshot)
-	if err != nil {
-		return err
-	}
-	return s.redisClient.Set(orderBookFullSnapshotKeyPrefix+productId, buf, 7*24*time.Hour).Err()
-}
-
 func (s *snapshotStore) getLastLevel2(productId string) (*OrderBookLevel2Snapshot, error) {
 	ret, err := s.redisClient.Get(orderBookL2SnapshotKeyPrefix + productId).Bytes()
 	if err != nil {
@@ -240,6 +233,14 @@ func (s *snapshotStore) getLastLevel2(productId string) (*OrderBookLevel2Snapsho
 	var snapshot OrderBookLevel2Snapshot
 	err = json.Unmarshal(ret, &snapshot)
 	return &snapshot, err
+}
+
+func (s *snapshotStore) storeFull(productId string, snapshot *OrderBookFullSnapshot) error {
+	buf, err := json.Marshal(snapshot)
+	if err != nil {
+		return err
+	}
+	return s.redisClient.Set(orderBookFullSnapshotKeyPrefix+productId, buf, 7*24*time.Hour).Err()
 }
 
 func (s *snapshotStore) getLastFull(productId string) (*OrderBookFullSnapshot, error) {
