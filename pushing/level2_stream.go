@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"github.com/gitbitex/gitbitex-spot/matching"
 	logger "github.com/siddontang/go-log/log"
+	"sync"
 	"time"
 )
 
@@ -117,9 +118,10 @@ func (s *OrderBookStream) runApplier() {
 					log.Price, log.Side)
 			}
 
-			if lastLevel2Snapshot == nil || s.orderBook.seq-lastLevel2Snapshot.Seq > 10 {
+			if lastLevel2Snapshot == nil || s.orderBook.seq-lastLevel2Snapshot.Seq > 100 {
 				lastLevel2Snapshot = s.orderBook.SnapshotLevel2(1000)
 				s.snapshotCh <- lastLevel2Snapshot
+				lastLevel2Snapshots.Store(s.productId, lastLevel2Snapshot)
 			}
 
 			if lastFullSnapshot == nil || s.orderBook.seq-lastFullSnapshot.Seq > 10000 {
@@ -131,10 +133,11 @@ func (s *OrderBookStream) runApplier() {
 				s.sub.publish(ChannelLevel2.FormatWithProductId(s.productId), l2Change)
 			}
 
-		case <-time.After(200 * time.Millisecond):
+		case <-time.After(time.Second):
 			if lastLevel2Snapshot == nil || s.orderBook.seq > lastLevel2Snapshot.Seq {
 				lastLevel2Snapshot = s.orderBook.SnapshotLevel2(1000)
 				s.snapshotCh <- lastLevel2Snapshot
+				lastLevel2Snapshots.Store(s.productId, lastLevel2Snapshot)
 			}
 		}
 	}
@@ -158,4 +161,14 @@ func (s *OrderBookStream) runSnapshots() {
 			}
 		}
 	}
+}
+
+var lastLevel2Snapshots = sync.Map{}
+
+func getLastLevel2Snapshot(productId string) *OrderBookLevel2Snapshot {
+	snapshot, found := lastLevel2Snapshots.Load(productId)
+	if !found {
+		return nil
+	}
+	return snapshot.(*OrderBookLevel2Snapshot)
 }

@@ -168,11 +168,7 @@ func (c *Client) runL2ChangeWriter(ctx context.Context) {
 			state := stateOf(l2Change.ProductId)
 
 			if state.resendSnapshot || l2Change.Seq == 0 {
-				snapshot, err := sharedSnapshotStore().getLastLevel2(l2Change.ProductId)
-				if err != nil {
-					log.Error(err)
-					continue
-				}
+				snapshot := getLastLevel2Snapshot(l2Change.ProductId)
 				if snapshot == nil {
 					log.Warnf("no snapshot for %v", l2Change.ProductId)
 					continue

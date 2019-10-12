@@ -186,15 +186,15 @@ func (s *orderBook) Restore(snapshot *OrderBookFullSnapshot) {
 	s.logSeq = snapshot.LogSeq
 }
 
-// snapshotStore is used to manage snapshots
-type snapshotStore struct {
+// redisSnapshotStore is used to manage snapshots
+type redisSnapshotStore struct {
 	redisClient *redis.Client
 }
 
-var store *snapshotStore
+var store *redisSnapshotStore
 var onceStore sync.Once
 
-func sharedSnapshotStore() *snapshotStore {
+func sharedSnapshotStore() *redisSnapshotStore {
 	onceStore.Do(func() {
 		gbeConfig, err := conf.GetConfig()
 		if err != nil {
@@ -207,12 +207,12 @@ func sharedSnapshotStore() *snapshotStore {
 			DB:       0,
 		})
 
-		store = &snapshotStore{redisClient: redisClient}
+		store = &redisSnapshotStore{redisClient: redisClient}
 	})
 	return store
 }
 
-func (s *snapshotStore) storeLevel2(productId string, snapshot *OrderBookLevel2Snapshot) error {
+func (s *redisSnapshotStore) storeLevel2(productId string, snapshot *OrderBookLevel2Snapshot) error {
 	buf, err := json.Marshal(snapshot)
 	if err != nil {
 		return err
@@ -220,7 +220,7 @@ func (s *snapshotStore) storeLevel2(productId string, snapshot *OrderBookLevel2S
 	return s.redisClient.Set(orderBookL2SnapshotKeyPrefix+productId, buf, 7*24*time.Hour).Err()
 }
 
-func (s *snapshotStore) getLastLevel2(productId string) (*OrderBookLevel2Snapshot, error) {
+func (s *redisSnapshotStore) getLastLevel2(productId string) (*OrderBookLevel2Snapshot, error) {
 	ret, err := s.redisClient.Get(orderBookL2SnapshotKeyPrefix + productId).Bytes()
 	if err != nil {
 		if err == redis.Nil {
@@ -235,7 +235,7 @@ func (s *snapshotStore) getLastLevel2(productId string) (*OrderBookLevel2Snapsho
 	return &snapshot, err
 }
 
-func (s *snapshotStore) storeFull(productId string, snapshot *OrderBookFullSnapshot) error {
+func (s *redisSnapshotStore) storeFull(productId string, snapshot *OrderBookFullSnapshot) error {
 	buf, err := json.Marshal(snapshot)
 	if err != nil {
 		return err
@@ -243,7 +243,7 @@ func (s *snapshotStore) storeFull(productId string, snapshot *OrderBookFullSnaps
 	return s.redisClient.Set(orderBookFullSnapshotKeyPrefix+productId, buf, 7*24*time.Hour).Err()
 }
 
-func (s *snapshotStore) getLastFull(productId string) (*OrderBookFullSnapshot, error) {
+func (s *redisSnapshotStore) getLastFull(productId string) (*OrderBookFullSnapshot, error) {
 	ret, err := s.redisClient.Get(orderBookFullSnapshotKeyPrefix + productId).Bytes()
 	if err != nil {
 		if err == redis.Nil {
