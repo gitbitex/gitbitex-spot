@@ -14,9 +14,14 @@
 
 package matching
 
+/*
+#include <unistd.h>
+*/
+import "C"
 import (
 	"github.com/gitbitex/gitbitex-spot/models"
 	logger "github.com/siddontang/go-log/log"
+	"os"
 	"time"
 )
 
@@ -31,7 +36,7 @@ type Engine struct {
 	orderReader OrderReader
 
 	// 读取order的起始offset，该值第一次启动时候会从快照中恢复
-	orderOffset int64
+	appliedOrderOffset int64
 
 	// 读取的order会写入chan，写入order的同时需要携带该order的offset
 	orderCh chan *offsetOrder
@@ -53,6 +58,9 @@ type Engine struct {
 
 	// 持久化snapshot的存储方式，应该支持多种方式，如本地磁盘，redis等
 	snapshotStore SnapshotStore
+
+	lastSnapOrderOffset int64
+	committedLogSeq     int64
 }
 
 // 快照是engine在某一时候的一致性内存状态
@@ -100,7 +108,7 @@ func (e *Engine) Start() {
 
 // 负责不断的拉取order，写入chan
 func (e *Engine) runFetcher() {
-	var offset = e.orderOffset
+	var offset = e.appliedOrderOffset
 	if offset > 0 {
 		offset = offset + 1
 	}
@@ -141,6 +149,7 @@ func (e *Engine) runApplier() {
 
 			// 记录订单的offset用于判断是否需要进行快照
 			orderOffset = offsetOrder.Offset
+			e.appliedOrderOffset = offsetOrder.Offset
 
 		case snapshot := <-e.snapshotReqCh:
 			// 接收到快照请求，判断是否真的需要执行快照
@@ -151,6 +160,8 @@ func (e *Engine) runApplier() {
 
 			logger.Infof("should take snapshot: %v %v-[%v]-%v->",
 				e.productId, snapshot.OrderOffset, delta, orderOffset)
+
+			e.saveSnapshotBackground()
 
 			// 执行快照，并将快照数据写入批准chan
 			snapshot.OrderBookSnapshot = e.OrderBook.Snapshot()
@@ -189,6 +200,7 @@ func (e *Engine) runCommitter() {
 				panic(err)
 			}
 			logs = nil
+			e.committedLogSeq = seq
 
 			// approve pending snapshot
 			if pending != nil && seq >= pending.OrderBookSnapshot.LogSeq {
@@ -217,7 +229,7 @@ func (e *Engine) runCommitter() {
 // 定时发起快照请求，同时负责持久化通过审批的快照
 func (e *Engine) runSnapshots() {
 	// 最后一次快照时的order orderOffset
-	orderOffset := e.orderOffset
+	orderOffset := e.appliedOrderOffset
 
 	for {
 		select {
@@ -243,8 +255,41 @@ func (e *Engine) runSnapshots() {
 	}
 }
 
+func (e *Engine) snapshot() *Snapshot {
+	return &Snapshot{
+		OrderBookSnapshot: e.OrderBook.Snapshot(),
+		OrderOffset:       e.appliedOrderOffset,
+	}
+}
+
 func (e *Engine) restore(snapshot *Snapshot) {
-	logger.Infof("restoring: %+v", *snapshot)
-	e.orderOffset = snapshot.OrderOffset
+	e.appliedOrderOffset = snapshot.OrderOffset
 	e.OrderBook.Restore(&snapshot.OrderBookSnapshot)
+}
+
+func (e *Engine) saveSnapshotBackground() {
+	pid := C.fork()
+	if pid < 0 {
+		logger.Warn("fork error")
+	} else if pid == 0 {
+		logger.Info("[pid=%v] taking snapshot", os.Getpid())
+		snap := e.snapshot()
+		if snap.OrderBookSnapshot.LogSeq < e.committedLogSeq {
+			logger.Warnf("[pid=%v] snapshot logSeq less than committed logSeq", os.Getpid())
+		}
+
+		/*err := e.snapshotStore.Store(snap)
+		if err != nil {
+			logger.Warnf("store snapshot failed: %v", err)
+			return
+		}*/
+		logger.Infof("[pid=%v] new snapshot stored :product=%v OrderOffset=%v LogSeq=%v pid=%v",
+			os.Getpid(), e.productId, snap.OrderOffset, snap.OrderBookSnapshot.LogSeq, os.Getpid())
+
+		// exit child process
+		os.Exit(0)
+
+	} else {
+		e.lastSnapOrderOffset = e.appliedOrderOffset
+	}
 }

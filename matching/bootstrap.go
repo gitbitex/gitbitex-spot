@@ -18,6 +18,8 @@ import (
 	"github.com/gitbitex/gitbitex-spot/conf"
 	"github.com/gitbitex/gitbitex-spot/service"
 	"github.com/siddontang/go-log/log"
+	"os/signal"
+	"syscall"
 )
 
 func StartEngine() {
@@ -25,6 +27,8 @@ func StartEngine() {
 	if err != nil {
 		panic(err)
 	}
+
+	signal.Ignore(syscall.SIGCHLD)
 
 	products, err := service.GetProducts()
 	if err != nil {
