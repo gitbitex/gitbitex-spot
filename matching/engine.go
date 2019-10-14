@@ -272,10 +272,10 @@ func (e *Engine) saveSnapshotBackground() {
 	if pid < 0 {
 		logger.Warn("fork error")
 	} else if pid == 0 {
-		logger.Infof("[pid=%v] taking snapshot", os.Getpid())
+		//logger.Infof("[pid=%v] taking snapshot", os.Getpid())
 		snap := e.snapshot()
 		if snap.OrderBookSnapshot.LogSeq < e.committedLogSeq {
-			logger.Warnf("[pid=%v] snapshot logSeq less than committed logSeq", os.Getpid())
+			//logger.Warnf("[pid=%v] snapshot logSeq less than committed logSeq", os.Getpid())
 		}
 
 		/*err := e.snapshotStore.Store(snap)
@@ -283,8 +283,8 @@ func (e *Engine) saveSnapshotBackground() {
 			logger.Warnf("store snapshot failed: %v", err)
 			return
 		}*/
-		logger.Infof("[pid=%v] new snapshot stored :product=%v OrderOffset=%v LogSeq=%v pid=%v",
-			os.Getpid(), e.productId, snap.OrderOffset, snap.OrderBookSnapshot.LogSeq, os.Getpid())
+		//logger.Infof("[pid=%v] new snapshot stored :product=%v OrderOffset=%v LogSeq=%v pid=%v",
+		//	os.Getpid(), e.productId, snap.OrderOffset, snap.OrderBookSnapshot.LogSeq, os.Getpid())
 
 		// exit child process
 		os.Exit(0)
