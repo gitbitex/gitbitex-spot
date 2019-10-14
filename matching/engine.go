@@ -15,13 +15,13 @@
 package matching
 
 /*
+#include <stdlib.h>
 #include <unistd.h>
 */
 import "C"
 import (
 	"github.com/gitbitex/gitbitex-spot/models"
 	logger "github.com/siddontang/go-log/log"
-	"os"
 	"time"
 )
 
@@ -287,7 +287,8 @@ func (e *Engine) saveSnapshotBackground() {
 		//	os.Getpid(), e.productId, snap.OrderOffset, snap.OrderBookSnapshot.LogSeq, os.Getpid())
 
 		// exit child process
-		os.Exit(0)
+		//os.Exit(0)
+		C.exit(0)
 
 	} else {
 		e.lastSnapOrderOffset = e.appliedOrderOffset
