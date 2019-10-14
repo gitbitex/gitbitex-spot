@@ -273,10 +273,10 @@ func (e *Engine) saveSnapshotBackground() {
 		logger.Warn("fork error")
 	} else if pid == 0 {
 		//logger.Infof("[pid=%v] taking snapshot", os.Getpid())
-		snap := e.snapshot()
+		/*snap := e.snapshot()
 		if snap.OrderBookSnapshot.LogSeq < e.committedLogSeq {
 			//logger.Warnf("[pid=%v] snapshot logSeq less than committed logSeq", os.Getpid())
-		}
+		}*/
 
 		/*err := e.snapshotStore.Store(snap)
 		if err != nil {
