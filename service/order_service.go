@@ -40,7 +40,7 @@ func PlaceOrder(userId int64, clientOid string, productId string, orderType mode
 			return nil, fmt.Errorf("size %v less than base min size %v", size, product.BaseMinSize)
 		}
 		price = price.Round(product.QuoteScale)
-		if size.LessThan(decimal.Zero) {
+		if price.LessThan(decimal.Zero) {
 			return nil, fmt.Errorf("price %v less than 0", price)
 		}
 		funds = size.Mul(price)
