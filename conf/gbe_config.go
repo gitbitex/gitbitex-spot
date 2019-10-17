@@ -17,6 +17,7 @@ package conf
 import (
 	"encoding/json"
 	"io/ioutil"
+	"sync"
 )
 
 type GbeConfig struct {
@@ -55,16 +56,20 @@ type RestServerConfig struct {
 	Addr string `json:"addr"`
 }
 
-func GetConfig() (*GbeConfig, error) {
-	bytes, err := ioutil.ReadFile("conf.json")
-	if err != nil {
-		return nil, err
-	}
+var config GbeConfig
+var configOnce sync.Once
 
-	var config GbeConfig
-	err = json.Unmarshal(bytes, &config)
-	if err != nil {
-		return nil, err
-	}
-	return &config, nil
+func GetConfig() *GbeConfig {
+	configOnce.Do(func() {
+		bytes, err := ioutil.ReadFile("conf.json")
+		if err != nil {
+			panic(err)
+		}
+
+		err = json.Unmarshal(bytes, &config)
+		if err != nil {
+			panic(err)
+		}
+	})
+	return &config
 }

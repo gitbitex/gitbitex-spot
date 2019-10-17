@@ -32,10 +32,7 @@ type BinLogStream struct {
 }
 
 func NewBinLogStream() *BinLogStream {
-	gbeConfig, err := conf.GetConfig()
-	if err != nil {
-		panic(err)
-	}
+	gbeConfig := conf.GetConfig()
 
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     gbeConfig.Redis.Addr,
@@ -161,10 +158,7 @@ func (s *BinLogStream) getColumnIndexByName(e *canal.RowsEvent, name string) int
 }
 
 func (s *BinLogStream) Start() {
-	gbeConfig, err := conf.GetConfig()
-	if err != nil {
-		panic(err)
-	}
+	gbeConfig := conf.GetConfig()
 
 	cfg := canal.NewDefaultConfig()
 	cfg.Addr = gbeConfig.DataSource.Addr

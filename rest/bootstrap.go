@@ -20,10 +20,7 @@ import (
 )
 
 func StartServer() {
-	gbeConfig, err := conf.GetConfig()
-	if err != nil {
-		panic(err)
-	}
+	gbeConfig := conf.GetConfig()
 
 	httpServer := NewHttpServer(gbeConfig.RestServer.Addr)
 	go httpServer.Start()

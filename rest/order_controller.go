@@ -44,10 +44,8 @@ func getWriter(productId string) *kafka.Writer {
 		return writer.(*kafka.Writer)
 	}
 
-	gbeConfig, err := conf.GetConfig()
-	if err != nil {
-		panic(err)
-	}
+	gbeConfig := conf.GetConfig()
+
 	newWriter := kafka.NewWriter(kafka.WriterConfig{
 		Brokers:      gbeConfig.Kafka.Brokers,
 		Topic:        matching.TopicOrderPrefix + productId,

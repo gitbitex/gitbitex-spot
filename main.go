@@ -28,10 +28,7 @@ import (
 )
 
 func main() {
-	gbeConfig, err := conf.GetConfig()
-	if err != nil {
-		panic(err)
-	}
+	gbeConfig := conf.GetConfig()
 
 	go func() {
 		log.Info(http.ListenAndServe("localhost:6060", nil))

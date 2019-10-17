@@ -26,9 +26,8 @@ import (
 )
 
 type redisStream struct {
-	sub       *subscription
-	mutex     sync.Mutex
-	gbeConfig *conf.GbeConfig
+	sub   *subscription
+	mutex sync.Mutex
 }
 
 func newRedisStream(sub *subscription) *redisStream {
@@ -39,18 +38,14 @@ func newRedisStream(sub *subscription) *redisStream {
 }
 
 func (s *redisStream) Start() {
-	gbeConf, err := conf.GetConfig()
-	if err != nil {
-		panic(err)
-	}
-	s.gbeConfig = gbeConf
+	gbeConfig := conf.GetConfig()
 
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     s.gbeConfig.Redis.Addr,
-		Password: s.gbeConfig.Redis.Password,
+		Addr:     gbeConfig.Redis.Addr,
+		Password: gbeConfig.Redis.Password,
 		DB:       0,
 	})
-	_, err = redisClient.Ping().Result()
+	_, err := redisClient.Ping().Result()
 	if err != nil {
 		panic(err)
 	}

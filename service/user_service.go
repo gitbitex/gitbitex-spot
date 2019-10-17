@@ -25,16 +25,6 @@ import (
 	"time"
 )
 
-var gbeConfig *conf.GbeConfig
-
-func init() {
-	cfg, err := conf.GetConfig()
-	if err != nil {
-		panic(err)
-	}
-	gbeConfig = cfg
-}
-
 func CreateUser(email, password string) (*models.User, error) {
 	if len(password) < 6 {
 		return nil, errors.New("password must be of minimum 6 characters length")
@@ -73,12 +63,12 @@ func RefreshAccessToken(email, password string) (string, error) {
 		"expiredAt":    time.Now().Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-	return token.SignedString([]byte(gbeConfig.JwtSecret))
+	return token.SignedString([]byte(conf.GetConfig().JwtSecret))
 }
 
 func CheckToken(tokenStr string) (*models.User, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		return []byte(gbeConfig.JwtSecret), nil
+		return []byte(conf.GetConfig().JwtSecret), nil
 	})
 	if err != nil {
 		return nil, err

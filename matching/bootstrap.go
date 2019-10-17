@@ -21,10 +21,7 @@ import (
 )
 
 func StartEngine() {
-	gbeConfig, err := conf.GetConfig()
-	if err != nil {
-		panic(err)
-	}
+	gbeConfig := conf.GetConfig()
 
 	products, err := service.GetProducts()
 	if err != nil {

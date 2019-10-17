@@ -31,10 +31,7 @@ type RedisSnapshotStore struct {
 }
 
 func NewRedisSnapshotStore(productId string) SnapshotStore {
-	gbeConfig, err := conf.GetConfig()
-	if err != nil {
-		panic(err)
-	}
+	gbeConfig := conf.GetConfig()
 
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     gbeConfig.Redis.Addr,

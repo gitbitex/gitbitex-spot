@@ -85,10 +85,7 @@ func (s *FillExecutor) Start() {
 
 // 监听消息队列通知
 func (s *FillExecutor) runMqListener() {
-	gbeConfig, err := conf.GetConfig()
-	if err != nil {
-		panic(err)
-	}
+	gbeConfig := conf.GetConfig()
 
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     gbeConfig.Redis.Addr,
