@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/gitbitex/gitbitex-spot/models"
-	"github.com/gitbitex/gitbitex-spot/utils"
 	"github.com/shopspring/decimal"
 	"github.com/siddontang/go-log/log"
 	"math"
@@ -30,44 +29,38 @@ const (
 )
 
 type orderBook struct {
-	// 每一个product都会对应一个order book
+	// one product corresponds to one order book
 	product *models.Product
 
-	// 深度，asks & bids
+	// depths: asks & bids
 	depths map[models.Side]*depth
 
-	// 严格连续递增的交易id，用于在trade的主键id
+	// strictly continuously increasing transaction ID, used for the primary key ID of trade
 	tradeSeq int64
 
-	// 严格连续递增的日志seq，用于写入撮合日志
+	// strictly continuously increasing log SEQ, used to write matching log
 	logSeq int64
 
-	// 防止order被重复提交到orderBook中，采用滑动窗口去重策略
+	// to prevent the order from being submitted to the order book repeatedly,
+	// a sliding window de duplication strategy is adopted.
 	orderIdWindow Window
 }
 
-// orderBook快照，定时保存快照用于快速启动恢复
 type orderBookSnapshot struct {
-	// 对应的product id
+	// order book product id
 	ProductId string
 
-	// orderBook中的全量订单
+	// all orders
 	Orders []BookOrder
 
-	// 当前tradeSeq
+	// trade seq at snapshot time
 	TradeSeq int64
 
-	// 当前logSeq
+	// log seq at snapshot time
 	LogSeq int64
 
-	// 去重窗口
+	// state of de duplication window
 	OrderIdWindow Window
-}
-
-type PriceLevel struct {
-	Price      decimal.Decimal
-	Size       decimal.Decimal
-	OrderCount int64
 }
 
 type priceOrderIdKey struct {
@@ -75,23 +68,12 @@ type priceOrderIdKey struct {
 	orderId int64
 }
 
-type BookOrder struct {
-	OrderId int64
-	Size    decimal.Decimal
-	Funds   decimal.Decimal
-	Price   decimal.Decimal
-	Side    models.Side
-	Type    models.OrderType
-}
-
 func NewOrderBook(product *models.Product) *orderBook {
 	asks := &depth{
-		levels: treemap.NewWith(utils.DecimalAscComparator),
 		queue:  treemap.NewWith(priceOrderIdKeyAscComparator),
 		orders: map[int64]*BookOrder{},
 	}
 	bids := &depth{
-		levels: treemap.NewWith(utils.DecimalDescComparator),
 		queue:  treemap.NewWith(priceOrderIdKeyDescComparator),
 		orders: map[int64]*BookOrder{},
 	}
@@ -112,14 +94,7 @@ func (o *orderBook) ApplyOrder(order *models.Order) (logs []Log) {
 		return logs
 	}
 
-	takerOrder := &BookOrder{
-		OrderId: order.Id,
-		Size:    order.Size,
-		Funds:   order.Funds,
-		Price:   order.Price,
-		Side:    order.Side,
-		Type:    order.Type,
-	}
+	takerOrder := newBookOrder(order)
 
 	// If it's a Market-Buy order, set price to infinite high, and if it's market-sell,
 	// set price to zero, which ensures that prices will cross.
@@ -286,35 +261,17 @@ func (o *orderBook) nextTradeSeq() int64 {
 }
 
 type depth struct {
-	// 保存所有正在book上的order
+	// all orders
 	orders map[int64]*BookOrder
 
-	// 价格优先的priceLevel队列，用于获取level2
-	// Price -> *PriceLevel
-	levels *treemap.Map
-
-	// 价格优先，时间优先的订单队列，用于订单match
+	// price first, time first order queue for order match
 	// priceOrderIdKey -> orderId
 	queue *treemap.Map
 }
 
 func (d *depth) add(order BookOrder) {
 	d.orders[order.OrderId] = &order
-
 	d.queue.Put(&priceOrderIdKey{order.Price, order.OrderId}, order.OrderId)
-
-	val, found := d.levels.Get(order.Price)
-	if !found {
-		d.levels.Put(order.Price, &PriceLevel{
-			Price:      order.Price,
-			Size:       order.Size,
-			OrderCount: 1,
-		})
-	} else {
-		level := val.(*PriceLevel)
-		level.Size = level.Size.Add(order.Size)
-		level.OrderCount++
-	}
 }
 
 func (d *depth) decrSize(orderId int64, size decimal.Decimal) error {
@@ -327,27 +284,33 @@ func (d *depth) decrSize(orderId int64, size decimal.Decimal) error {
 		return errors.New(fmt.Sprintf("order %v Size %v less than %v", orderId, order.Size, size))
 	}
 
-	var removed bool
 	order.Size = order.Size.Sub(size)
 	if order.Size.IsZero() {
 		delete(d.orders, orderId)
-		removed = true
-	}
-
-	// 订单被移除出orderBook，清理priceTime队列
-	if removed {
 		d.queue.Remove(&priceOrderIdKey{order.Price, order.OrderId})
 	}
 
-	val, _ := d.levels.Get(order.Price)
-	level := val.(*PriceLevel)
-	level.Size = level.Size.Sub(size)
-	if level.Size.IsZero() {
-		d.levels.Remove(order.Price)
-	} else if removed {
-		level.OrderCount--
-	}
 	return nil
+}
+
+type BookOrder struct {
+	OrderId int64
+	Size    decimal.Decimal
+	Funds   decimal.Decimal
+	Price   decimal.Decimal
+	Side    models.Side
+	Type    models.OrderType
+}
+
+func newBookOrder(order *models.Order) *BookOrder {
+	return &BookOrder{
+		OrderId: order.Id,
+		Size:    order.Size,
+		Funds:   order.Funds,
+		Price:   order.Price,
+		Side:    order.Side,
+		Type:    order.Type,
+	}
 }
 
 func priceOrderIdKeyAscComparator(a, b interface{}) int {

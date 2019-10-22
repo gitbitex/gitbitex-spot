@@ -57,6 +57,12 @@ type OrderBookFullSnapshot struct {
 	Orders    []matching.BookOrder
 }
 
+type PriceLevel struct {
+	Price      decimal.Decimal
+	Size       decimal.Decimal
+	OrderCount int64
+}
+
 func newOrderBook(productId string) *orderBook {
 	b := &orderBook{
 		productId: productId,
@@ -74,7 +80,7 @@ func (s *orderBook) saveOrder(logOffset, logSeq int64, orderId int64, newSize, p
 		panic(newSize)
 	}
 
-	var changedLevel *matching.PriceLevel
+	var changedLevel *PriceLevel
 
 	priceLevels := s.depths[side]
 	order, found := s.orders[orderId]
@@ -92,14 +98,14 @@ func (s *orderBook) saveOrder(logOffset, logSeq int64, orderId int64, newSize, p
 
 		val, found := priceLevels.Get(price)
 		if !found {
-			changedLevel = &matching.PriceLevel{
+			changedLevel = &PriceLevel{
 				Price:      price,
 				Size:       newSize,
 				OrderCount: 1,
 			}
 			priceLevels.Put(price, changedLevel)
 		} else {
-			changedLevel = val.(*matching.PriceLevel)
+			changedLevel = val.(*PriceLevel)
 			changedLevel.Size = changedLevel.Size.Add(newSize)
 			changedLevel.OrderCount++
 		}
@@ -120,7 +126,7 @@ func (s *orderBook) saveOrder(logOffset, logSeq int64, orderId int64, newSize, p
 			panic(fmt.Sprintf("%v %v %v %v", orderId, price, newSize, side))
 		}
 
-		changedLevel = val.(*matching.PriceLevel)
+		changedLevel = val.(*PriceLevel)
 		changedLevel.Size = changedLevel.Size.Sub(decrSize)
 		if changedLevel.Size.IsZero() {
 			priceLevels.Remove(price)
@@ -149,11 +155,11 @@ func (s *orderBook) SnapshotLevel2(levels int) *OrderBookLevel2Snapshot {
 		Bids:      make([][3]interface{}, utils.MinInt(levels, s.depths[models.SideBuy].Size())),
 	}
 	for itr, i := s.depths[models.SideBuy].Iterator(), 0; itr.Next() && i < levels; i++ {
-		v := itr.Value().(*matching.PriceLevel)
+		v := itr.Value().(*PriceLevel)
 		snapshot.Bids[i] = [3]interface{}{v.Price.String(), v.Size.String(), v.OrderCount}
 	}
 	for itr, i := s.depths[models.SideSell].Iterator(), 0; itr.Next() && i < levels; i++ {
-		v := itr.Value().(*matching.PriceLevel)
+		v := itr.Value().(*PriceLevel)
 		snapshot.Asks[i] = [3]interface{}{v.Price.String(), v.Size.String(), v.OrderCount}
 	}
 	return &snapshot
