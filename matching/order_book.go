@@ -287,9 +287,7 @@ func (d *depth) decrSize(orderId int64, size decimal.Decimal) error {
 	order.Size = order.Size.Sub(size)
 	if order.Size.IsZero() {
 		delete(d.orders, orderId)
-		if d.queue.Empty() {
-			d.queue.Remove(&priceOrderIdKey{order.Price, order.OrderId})
-		}
+		d.queue.Remove(&priceOrderIdKey{order.Price, order.OrderId})
 	}
 
 	return nil
