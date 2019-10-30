@@ -44,8 +44,8 @@ func (s *Store) AddBills(bills []*models.Bill) error {
 	}
 	var valueStrings []string
 	for _, bill := range bills {
-		valueString := fmt.Sprintf("('%v',%v, '%v', %v, %v, '%v', %v, '%v')",
-			time.Now(), bill.UserId, bill.Currency, bill.Available, bill.Hold, bill.Type, bill.Settled, bill.Notes)
+		valueString := fmt.Sprintf("(NOW(),%v, '%v', %v, %v, '%v', %v, '%v')",
+			bill.UserId, bill.Currency, bill.Available, bill.Hold, bill.Type, bill.Settled, bill.Notes)
 		valueStrings = append(valueStrings, valueString)
 	}
 	sql := fmt.Sprintf("INSERT INTO g_bill (created_at, user_id,currency,available,hold, type,settled,notes) VALUES %s", strings.Join(valueStrings, ","))
