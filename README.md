@@ -32,5 +32,9 @@ https://gitbitex.com:8080/trade/BTC-USDT
 * Run `npm run build` to build production
 
 
-## Problems?
-Please let me know if you have any problems. You can submit an issue or send me an email (greensheng2001@gmail.com) or Telegram (https://t.me/greensheng)
+## Questions?
+Please let me know if you have any questions. You can submit an issue or send me an email (greensheng2001@gmail.com) or Telegram (https://t.me/greensheng)
+
+## Contributing
+This project welcomes contributions and suggestions and we are excited to work with the power user community to build the best exchange in the world
+
