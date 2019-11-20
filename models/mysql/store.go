@@ -50,7 +50,7 @@ func NewStore(db *gorm.DB) *Store {
 }
 
 func initDb() error {
-	cfg := conf.GetConfig()
+	cfg := conf.Config
 
 	url := fmt.Sprintf("%v:%v@tcp(%v)/%v?charset=utf8&parseTime=True&loc=Local",
 		cfg.DataSource.User, cfg.DataSource.Password, cfg.DataSource.Addr, cfg.DataSource.Database)

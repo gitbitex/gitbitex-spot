@@ -61,5 +61,6 @@ require (
 	go.uber.org/zap v1.10.0 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
+	gopkg.in/stretchr/testify.v1 v1.2.2 // indirect
 	sigs.k8s.io/yaml v1.1.0 // indirect
 )

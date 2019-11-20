@@ -63,12 +63,12 @@ func RefreshAccessToken(email, password string) (string, error) {
 		"expiredAt":    time.Now().Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-	return token.SignedString([]byte(conf.GetConfig().JwtSecret))
+	return token.SignedString([]byte(conf.Config.JwtSecret))
 }
 
 func CheckToken(tokenStr string) (*models.User, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		return []byte(conf.GetConfig().JwtSecret), nil
+		return []byte(conf.Config.JwtSecret), nil
 	})
 	if err != nil {
 		return nil, err
