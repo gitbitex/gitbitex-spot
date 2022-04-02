@@ -1,3 +1,10 @@
+# This project has been abandoned. Please check the new version : https://github.com/gitbitex/gitbitex-new
+# This project has been abandoned. Please check the new version : https://github.com/gitbitex/gitbitex-new
+# This project has been abandoned. Please check the new version : https://github.com/gitbitex/gitbitex-new
+
+
+
+
 <p align="center"><img width="40%" src="https://getbitex.oss-cn-beijing.aliyuncs.com/projects/image/logo.svg" /></p>
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/gitbitex/gitbitex-spot)](https://goreportcard.com/report/github.com/gitbitex/gitbitex-spot)
