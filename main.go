@@ -15,6 +15,9 @@
 package main
 
 import (
+	"net/http"
+	_ "net/http/pprof"
+
 	"github.com/gitbitex/gitbitex-spot/conf"
 	"github.com/gitbitex/gitbitex-spot/matching"
 	"github.com/gitbitex/gitbitex-spot/models"
@@ -23,12 +26,11 @@ import (
 	"github.com/gitbitex/gitbitex-spot/service"
 	"github.com/gitbitex/gitbitex-spot/worker"
 	"github.com/prometheus/common/log"
-	"net/http"
-	_ "net/http/pprof"
 )
 
 func main() {
-	gbeConfig := conf.GetConfig()
+	// gbeConfig := conf.GetConfig()
+	conf.Init()
 
 	go func() {
 		log.Info(http.ListenAndServe("localhost:6060", nil))
@@ -47,9 +49,9 @@ func main() {
 		panic(err)
 	}
 	for _, product := range products {
-		worker.NewTickMaker(product.Id, matching.NewKafkaLogReader("tickMaker", product.Id, gbeConfig.Kafka.Brokers)).Start()
-		worker.NewFillMaker(matching.NewKafkaLogReader("fillMaker", product.Id, gbeConfig.Kafka.Brokers)).Start()
-		worker.NewTradeMaker(matching.NewKafkaLogReader("tradeMaker", product.Id, gbeConfig.Kafka.Brokers)).Start()
+		worker.NewTickMaker(product.Id, matching.NewKafkaLogReader("tickMaker", product.Id, conf.Config.Kafka.Brokers)).Start()
+		worker.NewFillMaker(matching.NewKafkaLogReader("fillMaker", product.Id, conf.Config.Kafka.Brokers)).Start()
+		worker.NewTradeMaker(matching.NewKafkaLogReader("tradeMaker", product.Id, conf.Config.Kafka.Brokers)).Start()
 	}
 
 	rest.StartServer()

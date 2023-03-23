@@ -21,16 +21,14 @@ import (
 )
 
 func StartEngine() {
-	gbeConfig := conf.GetConfig()
-
 	products, err := service.GetProducts()
 	if err != nil {
 		panic(err)
 	}
 	for _, product := range products {
-		orderReader := NewKafkaOrderReader(product.Id, gbeConfig.Kafka.Brokers)
+		orderReader := NewKafkaOrderReader(product.Id, conf.Config.Kafka.Brokers)
 		snapshotStore := NewRedisSnapshotStore(product.Id)
-		logStore := NewKafkaLogStore(product.Id, gbeConfig.Kafka.Brokers)
+		logStore := NewKafkaLogStore(product.Id, conf.Config.Kafka.Brokers)
 		matchEngine := NewEngine(product, orderReader, logStore, snapshotStore)
 		matchEngine.Start()
 	}

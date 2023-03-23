@@ -31,11 +31,10 @@ type RedisSnapshotStore struct {
 }
 
 func NewRedisSnapshotStore(productId string) SnapshotStore {
-	gbeConfig := conf.GetConfig()
 
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     gbeConfig.Redis.Addr,
-		Password: gbeConfig.Redis.Password,
+		Addr:     conf.Config.Redis.Addr,
+		Password: conf.Config.Redis.Password,
 		DB:       0,
 	})
 
