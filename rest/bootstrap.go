@@ -20,8 +20,9 @@ import (
 )
 
 func StartServer() {
+	gbeConfig := conf.GetConfig()
 
-	httpServer := NewHttpServer(conf.Config.RestServer.Addr)
+	httpServer := NewHttpServer(gbeConfig.RestServer.Addr)
 	go httpServer.Start()
 
 	log.Info("rest server ok")
