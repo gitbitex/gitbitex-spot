@@ -32,9 +32,11 @@ type BinLogStream struct {
 }
 
 func NewBinLogStream() *BinLogStream {
+	gbeConfig := conf.GetConfig()
+
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     conf.Config.Redis.Addr,
-		Password: conf.Config.Redis.Password,
+		Addr:     gbeConfig.Redis.Addr,
+		Password: gbeConfig.Redis.Password,
 		DB:       0,
 	})
 
@@ -156,15 +158,16 @@ func (s *BinLogStream) getColumnIndexByName(e *canal.RowsEvent, name string) int
 }
 
 func (s *BinLogStream) Start() {
+	gbeConfig := conf.GetConfig()
 
 	cfg := canal.NewDefaultConfig()
-	cfg.Addr = conf.Config.DataSource.Addr
-	cfg.User = conf.Config.DataSource.User
-	cfg.Password = conf.Config.DataSource.Password
+	cfg.Addr = gbeConfig.DataSource.Addr
+	cfg.User = gbeConfig.DataSource.User
+	cfg.Password = gbeConfig.DataSource.Password
 	cfg.Dump.ExecutionPath = ""
-	cfg.Dump.TableDB = conf.Config.DataSource.Database
+	cfg.Dump.TableDB = gbeConfig.DataSource.Database
 	cfg.ParseTime = true
-	cfg.IncludeTableRegex = []string{conf.Config.DataSource.Database + "\\..*"}
+	cfg.IncludeTableRegex = []string{gbeConfig.DataSource.Database + "\\..*"}
 	cfg.ExcludeTableRegex = []string{"mysql\\..*"}
 	c, err := canal.NewCanal(cfg)
 	if err != nil {

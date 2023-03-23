@@ -38,10 +38,11 @@ func newRedisStream(sub *subscription) *redisStream {
 }
 
 func (s *redisStream) Start() {
+	gbeConfig := conf.GetConfig()
 
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     conf.Config.Redis.Addr,
-		Password: conf.Config.Redis.Password,
+		Addr:     gbeConfig.Redis.Addr,
+		Password: gbeConfig.Redis.Password,
 		DB:       0,
 	})
 	_, err := redisClient.Ping().Result()

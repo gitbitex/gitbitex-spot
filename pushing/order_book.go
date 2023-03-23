@@ -202,10 +202,11 @@ var onceStore sync.Once
 
 func sharedSnapshotStore() *redisSnapshotStore {
 	onceStore.Do(func() {
+		gbeConfig := conf.GetConfig()
 
 		redisClient := redis.NewClient(&redis.Options{
-			Addr:     conf.Config.Redis.Addr,
-			Password: conf.Config.Redis.Password,
+			Addr:     gbeConfig.Redis.Addr,
+			Password: gbeConfig.Redis.Password,
 			DB:       0,
 		})
 

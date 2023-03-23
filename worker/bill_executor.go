@@ -57,9 +57,11 @@ func (s *BillExecutor) Start() {
 }
 
 func (s *BillExecutor) runMqListener() {
+	gbeConfig := conf.GetConfig()
+
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     conf.Config.Redis.Addr,
-		Password: conf.Config.Redis.Password,
+		Addr:     gbeConfig.Redis.Addr,
+		Password: gbeConfig.Redis.Password,
 		DB:       0,
 	})
 

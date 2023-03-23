@@ -22,6 +22,7 @@ import (
 )
 
 func StartServer() {
+	gbeConfig := conf.GetConfig()
 
 	sub := newSubscription()
 
@@ -32,12 +33,12 @@ func StartServer() {
 		panic(err)
 	}
 	for _, product := range products {
-		newTickerStream(product.Id, sub, matching.NewKafkaLogReader("tickerStream", product.Id, conf.Config.Kafka.Brokers)).Start()
-		newMatchStream(product.Id, sub, matching.NewKafkaLogReader("matchStream", product.Id, conf.Config.Kafka.Brokers)).Start()
-		newOrderBookStream(product.Id, sub, matching.NewKafkaLogReader("orderBookStream", product.Id, conf.Config.Kafka.Brokers)).Start()
+		newTickerStream(product.Id, sub, matching.NewKafkaLogReader("tickerStream", product.Id, gbeConfig.Kafka.Brokers)).Start()
+		newMatchStream(product.Id, sub, matching.NewKafkaLogReader("matchStream", product.Id, gbeConfig.Kafka.Brokers)).Start()
+		newOrderBookStream(product.Id, sub, matching.NewKafkaLogReader("orderBookStream", product.Id, gbeConfig.Kafka.Brokers)).Start()
 	}
 
-	go NewServer(conf.Config.PushServer.Addr, conf.Config.PushServer.Path, sub).Run()
+	go NewServer(gbeConfig.PushServer.Addr, gbeConfig.PushServer.Path, sub).Run()
 
 	log.Info("websocket server ok")
 }
